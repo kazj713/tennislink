@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  /* 主色调 */
+  --primary: #C41E3A; /* 中国红 */
+  --primary-dark: #A81A32;
+  --secondary: #006DB7; /* 网球蓝 */
+  --secondary-dark: #005A9E;
+  
+  /* 辅助色 */
+  --accent-blue: #006DB7; /* 网球蓝 */
+  --accent-gold: #FFD700; /* 金色 */
+  --accent-orange: #FF9800; /* 橙色 */
+  
+  /* 中性色 */
+  --dark-gray: #333333;
+  --medium-gray: #666666;
+  --light-gray: #E0E0E0;
+  --extra-light-gray: #F5F5F5;
+  
+  /* 背景色 */
+  --background: #ffffff;
+  --background-gradient: linear-gradient(135deg, #F5F5F5 0%, #E8F5E8 100%);
+  
+  /* 文本色 */
+  --foreground: #333333;
+  --foreground-secondary: #666666;
+  --foreground-light: #999999;
+  --foreground-inverse: #ffffff;
+  
+  /* 状态色 */
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --error: #F44336;
+  --info: #2196F3;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-orange: var(--accent-orange);
+  --color-dark-gray: var(--dark-gray);
+  --color-medium-gray: var(--medium-gray);
+  --color-light-gray: var(--light-gray);
+  --color-extra-light-gray: var(--extra-light-gray);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-light: var(--foreground-light);
+  --color-foreground-inverse: var(--foreground-inverse);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
