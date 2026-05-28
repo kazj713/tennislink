@@ -919,6 +919,53 @@ const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
   coerce: { date: true },
 });
 
+// Refund Requests
+export const refundRequestStatusEnum = pgEnum("refund_request_status", [
+  "pending_auto",
+  "pending_manual",
+  "approved",
+  "rejected",
+  "refunded",
+]);
+
+export const refundReasonTypeEnum = pgEnum("refund_reason_type", [
+  "personal",
+  "schedule_change",
+  "weather",
+  "other",
+]);
+
+export const refundRequests = pgTable(
+  "refund_requests",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+    paymentOrderId: varchar("payment_order_id", { length: 36 }).references(() => paymentOrders.id, { onDelete: "set null" }),
+    bookingId: varchar("booking_id", { length: 36 }),
+    reason: text("reason").notNull(),
+    reasonType: refundReasonTypeEnum("reason_type").notNull().default("personal"),
+    status: refundRequestStatusEnum("status").notNull().default("pending_auto"),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    adminNote: text("admin_note"),
+    reviewedBy: varchar("reviewed_by", { length: 36 }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    refundedAt: timestamp("refunded_at", { withTimezone: true }),
+    refundTransactionId: varchar("refund_transaction_id", { length: 255 }),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_refund_requests_user_id").on(table.userId),
+    index("idx_refund_requests_payment_order_id").on(table.paymentOrderId),
+    index("idx_refund_requests_status").on(table.status),
+    index("idx_refund_requests_created_at").on(table.createdAt),
+  ]
+);
+
+export type RefundRequest = typeof refundRequests.$inferSelect;
+export type InsertRefundRequest = typeof refundRequests.$inferInsert;
+
 // Users
 export const insertUserSchema = createCoercedInsertSchema(users).pick({
   username: true,
