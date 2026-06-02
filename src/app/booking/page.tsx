@@ -218,14 +218,14 @@ export default function BookingPage() {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                   step >= i
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-emerald-600 text-white'
                     : 'bg-gray-200 text-gray-500'
                 }`}
               >
                 {i}
               </div>
               {i < 3 && (
-                <div className={`w-24 h-1 ${step > i ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                <div className={`w-24 h-1 ${step > i ? 'bg-emerald-600' : 'bg-gray-200'}`} />
               )}
             </div>
           ))}
@@ -237,7 +237,7 @@ export default function BookingPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">选择教练</h2>
             {coaches.length === 0 ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">加载教练列表...</p>
               </div>
             ) : (
@@ -247,8 +247,8 @@ export default function BookingPage() {
                     key={coach.id}
                     className={`flex items-center p-6 border-2 rounded-xl cursor-pointer transition-all ${
                       bookingData.coach === coach.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300'
+                        ? 'border-emerald-500 bg-emerald-50'
+                        : 'border-gray-200 hover:border-emerald-300'
                     }`}
                   >
                     <input
@@ -257,7 +257,7 @@ export default function BookingPage() {
                       value={coach.id}
                       checked={bookingData.coach === coach.id}
                       onChange={(e) => setBookingData({ ...bookingData, coach: e.target.value })}
-                      className="w-5 h-5 text-blue-600"
+                      className="w-5 h-5 text-emerald-600"
                     />
                     <div className="ml-4 flex-1">
                       <div className="flex items-center justify-between">
@@ -269,15 +269,15 @@ export default function BookingPage() {
                               className="w-12 h-12 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-xl font-bold text-blue-600">
+                            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                              <span className="text-xl font-bold text-emerald-600">
                                 {coach.name[0]}
                               </span>
                             </div>
                           )}
                           <h3 className="text-xl font-bold text-gray-900">{coach.name}</h3>
                         </div>
-                        <span className="text-2xl font-bold text-blue-600">
+                        <span className="text-2xl font-bold text-emerald-600">
                           ¥{coach.price}
                           <span className="text-sm font-normal text-gray-500">/课时</span>
                         </span>
@@ -307,7 +307,7 @@ export default function BookingPage() {
               <button
                 onClick={handleNext}
                 disabled={!bookingData.coach || coaches.length === 0}
-                className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 下一步
               </button>
@@ -329,7 +329,7 @@ export default function BookingPage() {
                 min={today}
                 value={bookingData.date}
                 onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
               />
             </div>
 
@@ -345,8 +345,8 @@ export default function BookingPage() {
                     onClick={() => setBookingData({ ...bookingData, time: slot })}
                     className={`px-2 py-2 border-2 rounded-lg text-sm font-medium transition-all ${
                       bookingData.time === slot
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 hover:border-blue-300'
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-200 hover:border-emerald-300'
                     }`}
                   >
                     {slot}
@@ -371,8 +371,8 @@ export default function BookingPage() {
                       key={venue.id}
                       className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         bookingData.venue === venue.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
+                          ? 'border-emerald-500 bg-emerald-50'
+                          : 'border-gray-200 hover:border-emerald-300'
                       }`}
                     >
                       <input
@@ -381,12 +381,12 @@ export default function BookingPage() {
                         value={venue.id}
                         checked={bookingData.venue === venue.id}
                         onChange={(e) => setBookingData({ ...bookingData, venue: e.target.value })}
-                        className="w-5 h-5 text-blue-600"
+                        className="w-5 h-5 text-emerald-600"
                       />
                       <div className="ml-4 flex-1">
                         <div className="flex items-center justify-between">
                           <h3 className="font-semibold text-gray-900">{venue.name}</h3>
-                          <span className="text-lg font-bold text-blue-600">¥{venue.price}</span>
+                          <span className="text-lg font-bold text-emerald-600">¥{venue.price}</span>
                         </div>
                         <p className="text-sm text-gray-600">{venue.address}</p>
                       </div>
@@ -407,8 +407,8 @@ export default function BookingPage() {
                     key={ct.value}
                     className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
                       bookingData.courseType === ct.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300'
+                        ? 'border-emerald-500 bg-emerald-50'
+                        : 'border-gray-200 hover:border-emerald-300'
                     }`}
                   >
                     <input
@@ -417,7 +417,7 @@ export default function BookingPage() {
                       value={ct.value}
                       checked={bookingData.courseType === ct.value}
                       onChange={(e) => setBookingData({ ...bookingData, courseType: e.target.value })}
-                      className="w-5 h-5 text-blue-600"
+                      className="w-5 h-5 text-emerald-600"
                     />
                     <div className="ml-4 flex-1">
                       <div className="flex items-center justify-between">
@@ -442,7 +442,7 @@ export default function BookingPage() {
               <button
                 onClick={handleNext}
                 disabled={!bookingData.date || !bookingData.time || !bookingData.venue}
-                className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 下一步
               </button>
@@ -467,8 +467,8 @@ export default function BookingPage() {
                       className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-blue-600">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+                      <span className="text-2xl font-bold text-emerald-600">
                         {coaches.find((c) => c.id === bookingData.coach)?.name[0]}
                       </span>
                     </div>
@@ -530,7 +530,7 @@ export default function BookingPage() {
                 </div>
                 <div className="flex justify-between text-lg font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200">
                   <span>总计</span>
-                  <span className="text-blue-600">¥{calculateTotal()}</span>
+                  <span className="text-emerald-600">¥{calculateTotal()}</span>
                 </div>
               </div>
             </div>
@@ -547,7 +547,7 @@ export default function BookingPage() {
               <button
                 onClick={handlePayment}
                 disabled={loading}
-                className="flex-1 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">

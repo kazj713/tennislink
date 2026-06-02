@@ -18,7 +18,7 @@ export default function CommunityPage() {
       setPosts([
         {
           id: 1,
-          user: { name: '网球爱好者', avatarColor: 'from-blue-400 to-blue-600' },
+          user: { name: '网球爱好者', avatarColor: 'from-emerald-400 to-emerald-600' },
           content: '今天和教练练习发球，感觉进步很大！分享一下心得：手腕要放松，利用身体转动带动挥拍。大家有什么好的练习方法吗？',
           images: ['from-blue-400 to-blue-600'],
           tags: ['发球', '技术交流'],
@@ -40,7 +40,7 @@ export default function CommunityPage() {
         },
         {
           id: 3,
-          user: { name: '球技提升中', avatarColor: 'from-blue-400 to-blue-600' },
+          user: { name: '球技提升中', avatarColor: 'from-emerald-400 to-emerald-600' },
           content: '完成了本周的训练目标：连续击球 100 次！坚持就是胜利 💪',
           images: [],
           tags: ['打卡', '训练记录'],
@@ -84,8 +84,8 @@ export default function CommunityPage() {
       setTopics(['#发球技巧', '#新手入门', '#双打战术', '#体能训练', '#装备推荐']);
       
       setActiveUsers([
-        { name: '网球达人', level: '高级', color: 'from-blue-400 to-blue-600' },
-        { name: '教练张', level: '教练', color: 'from-blue-400 to-blue-600' },
+        { name: '网球达人', level: '高级', color: 'from-emerald-400 to-emerald-600' },
+        { name: '教练张', level: '教练', color: 'from-emerald-400 to-emerald-600' },
         { name: '新手小王', level: '初级', color: 'from-purple-400 to-purple-600' },
       ]);
       
@@ -97,7 +97,7 @@ export default function CommunityPage() {
     return (
       <div className="min-h-screen bg-gray-50 pt-16 pb-16 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mb-4"></div>
           <p className="text-gray-600">加载中...</p>
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function CommunityPage() {
           </div>
           <button
             onClick={() => setShowPostModal(true)}
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
+            className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors w-full sm:w-auto"
           >
             发布动态
           </button>
@@ -127,7 +127,7 @@ export default function CommunityPage() {
             onClick={() => setActiveTab('all')}
             className={`px-6 py-2 font-medium rounded-full transition-colors whitespace-nowrap ${
               activeTab === 'all'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -137,7 +137,7 @@ export default function CommunityPage() {
             onClick={() => setActiveTab('posts')}
             className={`px-6 py-2 font-medium rounded-full transition-colors whitespace-nowrap ${
               activeTab === 'posts'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -147,7 +147,7 @@ export default function CommunityPage() {
             onClick={() => setActiveTab('videos')}
             className={`px-6 py-2 font-medium rounded-full transition-colors whitespace-nowrap ${
               activeTab === 'videos'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -157,7 +157,7 @@ export default function CommunityPage() {
             onClick={() => setActiveTab('challenges')}
             className={`px-6 py-2 font-medium rounded-full transition-colors whitespace-nowrap ${
               activeTab === 'challenges'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -180,8 +180,8 @@ export default function CommunityPage() {
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         challenge.status === 'ongoing'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-blue-100 text-blue-700'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-emerald-100 text-emerald-700'
                       }`}
                     >
                       {challenge.status === 'ongoing' ? '进行中' : '即将开始'}
@@ -196,17 +196,17 @@ export default function CommunityPage() {
                     <div className="mb-4">
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-gray-600">进度</span>
-                        <span className="font-semibold text-blue-600">{challenge.progress}/{challenge.days}</span>
+                        <span className="font-semibold text-emerald-600">{challenge.progress}/{challenge.days}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                          className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${(challenge.progress / challenge.days) * 100}%` }}
                         />
                       </div>
                     </div>
                   )}
-                  <button className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                  <button className="w-full py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
                     {challenge.status === 'ongoing' ? '继续挑战' : '加入挑战'}
                   </button>
                 </div>
@@ -255,7 +255,7 @@ export default function CommunityPage() {
                     {post.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
                       >
                         #{tag}
                       </span>
@@ -270,13 +270,13 @@ export default function CommunityPage() {
                       </svg>
                       <span>{post.likes}</span>
                     </button>
-                    <button className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+                    <button className="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition-colors">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                       <span>{post.comments}</span>
                     </button>
-                    <button className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+                    <button className="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition-colors">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                       </svg>
@@ -287,8 +287,8 @@ export default function CommunityPage() {
               ))
             ) : (
               <div className="bg-white rounded-xl p-12 text-center">
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
@@ -296,7 +296,7 @@ export default function CommunityPage() {
                 <p className="text-gray-600 mb-6">成为第一个发布动态的人吧！</p>
                 <button
                   onClick={() => setShowPostModal(true)}
-                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
                 >
                   发布第一条动态
                 </button>
@@ -315,7 +315,7 @@ export default function CommunityPage() {
                     key={topic}
                     className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
                   >
-                    <span className="text-blue-600 font-semibold">{topic}</span>
+                    <span className="text-emerald-600 font-semibold">{topic}</span>
                     <span className="text-sm text-gray-500">{(100 - index * 15)} 讨论</span>
                   </div>
                 ))}
@@ -350,25 +350,25 @@ export default function CommunityPage() {
               <h3 className="text-lg font-bold text-gray-900 mb-4">社区指南</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>分享真实的网球经验和心得</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>尊重他人，友善交流</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>遵守社区规范，不发布违规内容</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>保护个人隐私，不泄露敏感信息</span>
@@ -399,7 +399,7 @@ export default function CommunityPage() {
             <div className="p-6">
               <textarea
                 placeholder="分享你的网球心得..."
-                className="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none mb-4"
+                className="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none resize-none mb-4"
               />
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
@@ -421,7 +421,7 @@ export default function CommunityPage() {
                   添加标签
                 </button>
               </div>
-              <button className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="w-full py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
                 发布
               </button>
             </div>

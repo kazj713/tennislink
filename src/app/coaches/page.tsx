@@ -19,7 +19,7 @@ export default function CoachesPage() {
       students: 500,
       price: 300,
       tags: ['ATP认证', '发球专家', '青少年'],
-      avatarColor: 'from-blue-400 to-blue-600',
+      avatarColor: 'from-emerald-400 to-emerald-600',
       description: '10年教学经验，前省队主力，擅长发球和底线技术',
     },
     {
@@ -30,7 +30,7 @@ export default function CoachesPage() {
       students: 350,
       price: 250,
       tags: ['省队', '底线', '双打'],
-      avatarColor: 'from-blue-400 to-blue-600',
+      avatarColor: 'from-emerald-400 to-emerald-600',
       description: '8年教学经验，前省队主力，专注底线技术和双打战术',
     },
     {
@@ -41,7 +41,7 @@ export default function CoachesPage() {
       students: 200,
       price: 200,
       tags: ['青少年', '入门', '趣味'],
-      avatarColor: 'from-purple-400 to-purple-600',
+      avatarColor: 'from-teal-400 to-teal-600',
       description: '5年教学经验，专注于青少年网球启蒙，教学风格活泼',
     },
     {
@@ -52,7 +52,7 @@ export default function CoachesPage() {
       students: 600,
       price: 400,
       tags: ['国际认证', '战术', '比赛'],
-      avatarColor: 'from-red-400 to-red-600',
+      avatarColor: 'from-rose-400 to-rose-600',
       description: '12年教学经验，ITF认证教练，擅长比赛战术分析',
     },
     {
@@ -63,7 +63,7 @@ export default function CoachesPage() {
       students: 280,
       price: 220,
       tags: ['网前', '截击', '进阶'],
-      avatarColor: 'from-yellow-400 to-yellow-600',
+      avatarColor: 'from-amber-400 to-amber-600',
       description: '6年教学经验，专注网前技术和截击技巧，帮助学员提升进攻能力',
     },
     {
@@ -74,7 +74,7 @@ export default function CoachesPage() {
       students: 320,
       price: 280,
       tags: ['体能', '康复', '全面'],
-      avatarColor: 'from-indigo-400 to-indigo-600',
+      avatarColor: 'from-cyan-400 to-cyan-600',
       description: '7年教学经验，结合体能训练和康复指导，全面提升学员身体素质',
     },
   ];
@@ -82,10 +82,10 @@ export default function CoachesPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
+      <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">找到你的专属教练</h1>
-          <p className="text-xl text-blue-100">
+          <p className="text-xl text-emerald-100">
             AI 智能匹配，为你推荐最适合的网球教练
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function CoachesPage() {
             <select
               value={filters.location}
               onChange={(e) => setFilters({...filters, location: e.target.value})}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
             >
               <option value="">全部城市</option>
               <option value="beijing">北京</option>
@@ -110,7 +110,7 @@ export default function CoachesPage() {
             <select
               value={filters.level}
               onChange={(e) => setFilters({...filters, level: e.target.value})}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
             >
               <option value="">全部水平</option>
               <option value="beginner">新手</option>
@@ -122,7 +122,7 @@ export default function CoachesPage() {
             <select
               value={filters.priceRange}
               onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
             >
               <option value="">全部价格</option>
               <option value="0-200">¥0 - ¥200</option>
@@ -131,7 +131,7 @@ export default function CoachesPage() {
               <option value="400+">¥400+</option>
             </select>
 
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+            <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold">
               搜索
             </button>
           </div>
@@ -171,7 +171,7 @@ export default function CoachesPage() {
                   {coach.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full"
+                      className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
                     >
                       {tag}
                     </span>
@@ -184,7 +184,7 @@ export default function CoachesPage() {
                     <span>{coach.years}年经验</span>
                     <span>{coach.students}+学员</span>
                   </div>
-                  <span className="text-2xl font-bold text-blue-600">
+                  <span className="text-2xl font-bold text-emerald-600">
                     ¥{coach.price}
                     <span className="text-sm font-normal text-gray-500">/课时</span>
                   </span>
