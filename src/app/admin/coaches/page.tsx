@@ -156,25 +156,25 @@ export default function AdminCoachesPage() {
     switch (status) {
       case "pending":
         return (
-          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(201,162,39,0.2)', color: '#fbbf24', border: '1px solid rgba(201,162,39,0.3)' }}>
             待审核
           </span>
         );
       case "approved":
         return (
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' }}>
             已通过
           </span>
         );
       case "rejected":
         return (
-          <span className="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(220,53,69,0.2)', color: '#f87171', border: '1px solid rgba(220,53,69,0.3)' }}>
             已拒绝
           </span>
         );
       case "suspended":
         return (
-          <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.2)' }}>
             已暂停
           </span>
         );
@@ -186,7 +186,7 @@ export default function AdminCoachesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-white/55">加载中...</div>
       </div>
     );
   }
@@ -196,8 +196,8 @@ export default function AdminCoachesPage() {
       {/* 页面标题 */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">教练管理</h1>
-          <p className="text-gray-600 mt-2">审核和管理平台教练</p>
+          <h1 className="text-3xl font-bold text-white">教练管理</h1>
+          <p className="text-white/70 mt-2">审核和管理平台教练</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -209,61 +209,69 @@ export default function AdminCoachesPage() {
       </div>
 
       {/* 筛选和搜索 */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+      <div className="rounded-xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex flex-col md:flex-row gap-4">
           {/* 搜索 */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={20} />
             <input
               type="text"
               placeholder="搜索教练姓名或邮箱..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 rounded-lg outline-none text-white placeholder-white/40"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
             />
           </div>
 
           {/* 筛选 */}
           <div className="flex items-center gap-2">
-            <Filter size={20} className="text-gray-400" />
+            <Filter size={20} className="text-white/40" />
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 rounded-lg outline-none text-white"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <option value="all">全部状态</option>
-              <option value="pending">待审核</option>
-              <option value="approved">已通过</option>
-              <option value="rejected">已拒绝</option>
+              <option value="all" style={{ color: '#000', background: '#fff' }}>全部状态</option>
+              <option value="pending" style={{ color: '#000', background: '#fff' }}>待审核</option>
+              <option value="approved" style={{ color: '#000', background: '#fff' }}>已通过</option>
+              <option value="rejected" style={{ color: '#000', background: '#fff' }}>已拒绝</option>
             </select>
           </div>
         </div>
       </div>
 
       {/* 教练列表 */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead style={{ background: 'rgba(30,50,42,0.5)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
               <tr>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">教练信息</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">经验/评级</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">专长</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">时薪</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">状态</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">操作</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">教练信息</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">经验/评级</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">专长</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">时薪</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">状态</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">操作</th>
               </tr>
             </thead>
             <tbody>
               {filteredCoaches.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-500">
+                  <td colSpan={6} className="py-12 text-center text-white/55">
                     没有找到匹配的教练
                   </td>
                 </tr>
               ) : (
-                filteredCoaches.map((coach) => (
-                  <tr key={coach.id} className="border-b border-gray-100 hover:bg-gray-50">
+                filteredCoaches.map((coach, index) => (
+                  <tr
+                    key={coach.id}
+                    className="border-b border-white/5 transition-colors"
+                    style={{ background: index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'}
+                  >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         {coach.user.avatar ? (
@@ -275,27 +283,27 @@ export default function AdminCoachesPage() {
                             className="w-12 h-12 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <UserCheck className="text-blue-600" size={24} />
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.2)' }}>
+                            <UserCheck className="text-blue-400" size={24} />
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold text-gray-900">{coach.user.name}</p>
-                          <p className="text-sm text-gray-600">{coach.user.email}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="font-semibold text-white">{coach.user.name}</p>
+                          <p className="text-sm text-white/70">{coach.user.email}</p>
+                          <p className="text-sm text-white/50">
                             {coach.user.city} · 技能等级 {coach.user.skillLevel}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <p className="text-gray-900">
+                      <p className="text-white/90">
                         {coach.experienceYears} 年经验
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-white/70">
                         ⭐ {coach.averageRating} ({coach.reviewCount}条评价)
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-white/70">
                         {coach.totalLessons} 节课程
                       </p>
                     </td>
@@ -304,20 +312,21 @@ export default function AdminCoachesPage() {
                         {coach.specialties.slice(0, 2).map((specialty) => (
                           <span
                             key={specialty}
-                            className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded"
+                            className="px-2 py-1 text-xs rounded"
+                            style={{ background: 'rgba(59,130,246,0.15)', color: '#93c5fd' }}
                           >
                             {specialty}
                           </span>
                         ))}
                         {coach.specialties.length > 2 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                          <span className="px-2 py-1 text-xs rounded" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
                             +{coach.specialties.length - 2}
                           </span>
                         )}
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-white">
                         ¥{Number(coach.hourlyRate)}/小时
                       </p>
                     </td>
@@ -328,14 +337,20 @@ export default function AdminCoachesPage() {
                           <>
                             <button
                               onClick={() => handleApprove(coach.id)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-2 rounded-lg transition-colors"
+                              style={{ color: '#93c5fd' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59,130,246,0.15)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                               title="通过"
                             >
                               <Check size={20} />
                             </button>
                             <button
                               onClick={() => handleReject(coach.id)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 rounded-lg transition-colors"
+                              style={{ color: '#f87171' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(220,53,69,0.15)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                               title="拒绝"
                             >
                               <X size={20} />
@@ -345,7 +360,10 @@ export default function AdminCoachesPage() {
                         {coach.status === "approved" && (
                           <button
                             onClick={() => handleReject(coach.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ color: '#f87171' }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(220,53,69,0.15)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             title="暂停"
                           >
                             <X size={20} />

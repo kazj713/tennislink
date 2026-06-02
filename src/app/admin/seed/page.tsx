@@ -39,19 +39,19 @@ export default function SeedDataPage() {
     <div>
       {/* 页面标题 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">数据初始化</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-white">数据初始化</h1>
+        <p className="text-white/70 mt-2">
           初始化系统所需的示例数据，包括用户、教练、场地和课程
         </p>
       </div>
 
       {/* 说明卡片 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+      <div className="rounded-lg p-6 mb-8" style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}>
         <div className="flex items-start gap-3">
-          <Database className="text-blue-600 mt-1" size={20} />
+          <Database className="mt-1" size={20} style={{ color: '#93c5fd' }} />
           <div>
-            <h3 className="font-semibold text-blue-900 mb-2">数据初始化说明</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
+            <h3 className="font-semibold mb-2" style={{ color: '#93c5fd' }}>数据初始化说明</h3>
+            <ul className="text-sm space-y-1" style={{ color: '#93c5fd' }}>
               <li>• 创建 1 个管理员账号</li>
               <li>• 创建 4 位认证教练（李明、张伟、王芳、陈强）</li>
               <li>• 创建 4 个场地（北京、上海、广州、深圳）</li>
@@ -63,11 +63,11 @@ export default function SeedDataPage() {
       </div>
 
       {/* 初始化按钮 */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div className="rounded-xl p-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">初始化数据</h2>
-            <p className="text-gray-600 text-sm mt-1">
+            <h2 className="text-lg font-semibold text-white">初始化数据</h2>
+            <p className="text-white/60 text-sm mt-1">
               点击下方按钮开始数据初始化
             </p>
           </div>
@@ -101,17 +101,21 @@ export default function SeedDataPage() {
           <div
             className={`mt-4 p-4 rounded-lg flex items-center gap-3 ${
               result.success
-                ? "bg-blue-50 border border-blue-200"
-                : "bg-red-50 border border-red-200"
+                ? ""
+                : ""
             }`}
+            style={result.success
+              ? { background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.25)' }
+              : { background: 'rgba(220,53,69,0.15)', border: '1px solid rgba(220,53,69,0.25)' }
+            }
           >
             {result.success ? (
-              <CheckCircle className="text-blue-600" size={20} />
+              <CheckCircle size={20} style={{ color: '#93c5fd' }} />
             ) : (
-              <AlertCircle className="text-red-600" size={20} />
+              <AlertCircle size={20} style={{ color: '#f87171' }} />
             )}
             <span
-              className={result.success ? "text-blue-900" : "text-red-900"}
+              style={result.success ? { color: '#93c5fd' } : { color: '#f87171' }}
             >
               {result.message}
             </span>
@@ -121,18 +125,18 @@ export default function SeedDataPage() {
 
       {/* 登录信息 */}
       {result && result.success && (
-        <div className="mt-8 bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-4">测试账号信息</h3>
+        <div className="mt-8 rounded-xl p-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <h3 className="font-semibold text-white mb-4">测试账号信息</h3>
           <div className="space-y-3">
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <p className="font-medium text-gray-900">管理员</p>
-              <p className="text-sm text-gray-600">账号: admin@tennislink.com</p>
-              <p className="text-sm text-gray-600">密码: admin123456</p>
+            <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <p className="font-medium text-white">管理员</p>
+              <p className="text-sm text-white/70">账号: admin@tennislink.com</p>
+              <p className="text-sm text-white/70">密码: admin123456</p>
             </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <p className="font-medium text-gray-900">教练（4位）</p>
-              <p className="text-sm text-gray-600">账号: liming@coach.com / zhangwei@coach.com / wangfang@coach.com / chenqiang@coach.com</p>
-              <p className="text-sm text-gray-600">密码: coach123</p>
+            <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <p className="font-medium text-white">教练（4位）</p>
+              <p className="text-sm text-white/70">账号: liming@coach.com / zhangwei@coach.com / wangfang@coach.com / chenqiang@coach.com</p>
+              <p className="text-sm text-white/70">密码: coach123</p>
             </div>
           </div>
         </div>

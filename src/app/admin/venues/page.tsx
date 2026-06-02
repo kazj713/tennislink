@@ -128,19 +128,19 @@ export default function AdminVenuesPage() {
     switch (type) {
       case "indoor":
         return (
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' }}>
             室内
           </span>
         );
       case "outdoor":
         return (
-          <span className="px-3 py-1 bg-orange-100 text-orange-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(249,115,22,0.2)', color: '#fdba74', border: '1px solid rgba(249,115,22,0.3)' }}>
             室外
           </span>
         );
       case "mixed":
         return (
-          <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(168,85,247,0.2)', color: '#d8b4fe', border: '1px solid rgba(168,85,247,0.3)' }}>
             混合
           </span>
         );
@@ -152,7 +152,7 @@ export default function AdminVenuesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-white/55">加载中...</div>
       </div>
     );
   }
@@ -162,8 +162,8 @@ export default function AdminVenuesPage() {
       {/* 页面标题 */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">场地管理</h1>
-          <p className="text-gray-600 mt-2">添加和管理网球场地</p>
+          <h1 className="text-3xl font-bold text-white">场地管理</h1>
+          <p className="text-white/70 mt-2">添加和管理网球场地</p>
         </div>
         <button
           onClick={() => {
@@ -178,15 +178,16 @@ export default function AdminVenuesPage() {
       </div>
 
       {/* 搜索 */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+      <div className="rounded-xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={20} />
           <input
             type="text"
             placeholder="搜索场地名称或地址..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 rounded-lg outline-none text-white placeholder-white/40"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
           />
         </div>
       </div>
@@ -194,19 +195,20 @@ export default function AdminVenuesPage() {
       {/* 场地列表 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredVenues.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-gray-500 bg-white rounded-xl shadow-sm border border-gray-100">
-            没有找到匹配的场地
+          <div className="col-span-full py-12 text-center rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <p className="text-white/55">没有找到匹配的场地</p>
           </div>
         ) : (
           filteredVenues.map((venue) => (
             <div
               key={venue.id}
-              className={`bg-white rounded-xl shadow-sm border overflow-hidden ${
-                venue.isActive ? "border-gray-100" : "border-gray-300 opacity-60"
+              className={`rounded-xl overflow-hidden ${
+                venue.isActive ? "" : "opacity-60"
               }`}
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
               {/* 场地图片 */}
-              <div className="relative h-48 bg-gray-200">
+              <div className="relative h-48" style={{ background: 'rgba(255,255,255,0.05)' }}>
                 {venue.images && venue.images.length > 0 ? (
                   <Image
                     src={venue.images[0]}
@@ -216,7 +218,7 @@ export default function AdminVenuesPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Building2 className="text-gray-400" size={48} />
+                    <Building2 className="text-white/30" size={48} />
                   </div>
                 )}
                 <div className="absolute top-3 right-3">
@@ -226,34 +228,35 @@ export default function AdminVenuesPage() {
 
               {/* 场地信息 */}
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-2">
                   {venue.name}
                 </h3>
 
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
+                <div className="space-y-2 text-sm text-white/70 mb-4">
                   <div className="flex items-start gap-2">
-                    <MapPin size={16} className="mt-0.5 text-gray-400" />
+                    <MapPin size={16} className="mt-0.5 text-white/40" />
                     <span>{venue.address}</span>
                   </div>
                   {venue.phone && (
                     <div className="flex items-center gap-2">
-                      <Phone size={16} className="text-gray-400" />
+                      <Phone size={16} className="text-white/40" />
                       <span>{venue.phone}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">设施:</span>
+                    <span className="text-white/40">设施:</span>
                     <div className="flex flex-wrap gap-1">
                       {venue.facilities.slice(0, 3).map((facility) => (
                         <span
                           key={facility}
-                          className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded"
+                          className="px-2 py-0.5 text-xs rounded"
+                          style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}
                         >
                           {facility}
                         </span>
                       ))}
                       {venue.facilities.length > 3 && (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                        <span className="px-2 py-0.5 text-xs rounded" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
                           +{venue.facilities.length - 3}
                         </span>
                       )}
@@ -268,14 +271,20 @@ export default function AdminVenuesPage() {
                       setEditingVenue(venue);
                       setShowModal(true);
                     }}
-                    className="flex-1 px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-center gap-1 text-white"
+                    style={{ background: 'rgba(255,255,255,0.1)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                   >
                     <Edit2 size={16} />
                     <span>编辑</span>
                   </button>
                   <button
                     onClick={() => handleDelete(venue.id)}
-                    className="px-3 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+                    className="px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-center gap-1 text-white"
+                    style={{ background: 'rgba(220,53,69,0.2)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(220,53,69,0.3)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(220,53,69,0.2)'}
                   >
                     <Trash2 size={16} />
                     <span>删除</span>

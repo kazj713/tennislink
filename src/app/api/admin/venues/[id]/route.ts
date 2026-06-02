@@ -104,7 +104,6 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // 验证管理员权限
     const token = await verifyToken();
     if (!token || token.role !== "admin") {
       return NextResponse.json(
@@ -113,8 +112,14 @@ export async function DELETE(
       );
     }
 
-    // 删除场地
-    await venueManager.deleteVenue(id);
+    const result = await venueManager.deleteVenue(id);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -122,8 +127,13 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Delete venue error:", error);
+    const errorMessage = error instanceof Error ? error.message : "未知错误";
     return NextResponse.json(
-      { success: false, error: "删除场地失败" },
+      {
+        success: false,
+        error: "删除场地失败",
+        details: errorMessage,
+      },
       { status: 500 }
     );
   }

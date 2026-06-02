@@ -14,6 +14,8 @@ import {
   index,
   decimal,
   pgEnum,
+  date,
+  numeric,
 } from "drizzle-orm/pg-core";
 import { createSchemaFactory } from "drizzle-zod";
 import { z } from "zod";
@@ -1731,3 +1733,398 @@ export const updateSystemSettingSchema = createCoercedInsertSchema(systemSetting
 export type SystemSetting = typeof systemSettings.$inferSelect;
 export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type UpdateSystemSetting = z.infer<typeof updateSystemSettingSchema>;
+
+// ==================== 场地预约系统 (Court Booking) ====================
+
+// 场地预约状态枚举
+const courtBookingStatusEnum = pgEnum("court_booking_status", [
+  "pending_payment",
+  "pending",
+  "confirmed",
+  "cancelled",
+  "completed"
+]);
+
+// 场地表
+export const courts = pgTable(
+  "courts",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    clubId: varchar("club_id", { length: 36 }).notNull(),
+    courtNumber: varchar("court_number", { length: 50 }).notNull(),
+    name: varchar("name", { length: 255 }),
+    courtType: varchar("court_type", { length: 20 }).notNull().default("indoor"),
+    surfaceType: varchar("surface_type", { length: 20 }).notNull().default("hard"),
+    description: text("description"),
+    images: jsonb("images"),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => ({
+    clubIdx: index("courts_club_idx").on(table.clubId),
+    courtNumberIdx: index("courts_court_number_idx").on(table.courtNumber),
+  })
+);
+
+// 场地预约表
+export const courtBookings = pgTable(
+  "court_bookings",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    bookingNo: varchar("booking_no", { length: 64 }).notNull().unique(),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    courtId: varchar("court_id", { length: 36 }).notNull(),
+    bookingDate: date("booking_date").notNull(),
+    startTime: varchar("start_time", { length: 5 }).notNull(),
+    endTime: varchar("end_time", { length: 5 }).notNull(),
+    totalHours: numeric("total_hours", { precision: 4, scale: 2 }).notNull(),
+    totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+    status: courtBookingStatusEnum("status").notNull().default("pending_payment"),
+    paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"),
+    cancelReason: text("cancel_reason"),
+    cancelledBy: varchar("cancelled_by", { length: 36 }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    notes: text("notes"),
+    notificationSent: boolean("notification_sent").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+    paymentOrderId: varchar("payment_order_id", { length: 36 }),
+  },
+  (table) => ({
+    userIdx: index("court_bookings_user_idx").on(table.userId),
+    courtIdx: index("court_bookings_court_idx").on(table.courtId),
+    bookingDateIdx: index("court_bookings_booking_date_idx").on(table.bookingDate),
+    statusIdx: index("court_bookings_status_idx").on(table.status),
+  })
+);
+
+// Court Schemas
+export const insertCourtSchema = createCoercedInsertSchema(courts).pick({
+  clubId: true,
+  courtNumber: true,
+  name: true,
+  courtType: true,
+  surfaceType: true,
+  description: true,
+  images: true,
+  isActive: true,
+});
+
+export const updateCourtSchema = createCoercedInsertSchema(courts)
+  .pick({
+    courtNumber: true,
+    name: true,
+    courtType: true,
+    surfaceType: true,
+    description: true,
+    images: true,
+    isActive: true,
+  })
+  .partial();
+
+// Court Booking Schemas
+export const insertCourtBookingSchema = createCoercedInsertSchema(courtBookings).pick({
+  bookingNo: true,
+  userId: true,
+  courtId: true,
+  bookingDate: true,
+  startTime: true,
+  endTime: true,
+  totalHours: true,
+  totalAmount: true,
+  notes: true,
+  paymentOrderId: true,
+});
+
+export const updateCourtBookingSchema = createCoercedInsertSchema(courtBookings)
+  .pick({
+    status: true,
+    paymentStatus: true,
+    cancelReason: true,
+    cancelledBy: true,
+    notes: true,
+    notificationSent: true,
+  })
+  .partial();
+
+// Types
+export type Court = typeof courts.$inferSelect;
+export type InsertCourt = z.infer<typeof insertCourtSchema>;
+export type UpdateCourt = z.infer<typeof updateCourtSchema>;
+
+// ==================== 俱乐部相关表 ====================
+
+// 俱乐部表
+export const clubs = pgTable(
+  "clubs",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    address: text("address").notNull(),
+    city: varchar("city", { length: 100 }).notNull(),
+    district: varchar("district", { length: 100 }),
+    latitude: numeric("latitude", { precision: 10, scale: 8 }),
+    longitude: numeric("longitude", { precision: 11, scale: 8 }),
+    phone: varchar("phone", { length: 20 }),
+    managerId: varchar("manager_id", { length: 36 }),
+    images: jsonb("images"),
+    facilities: jsonb("facilities"),
+    openingHours: jsonb("opening_hours"),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => ({
+    nameIdx: index("clubs_name_idx").on(table.name),
+    cityIdx: index("clubs_city_idx").on(table.city),
+    managerIdIdx: index("clubs_manager_id_idx").on(table.managerId),
+  })
+);
+
+// Club Schemas
+export const insertClubSchema = createCoercedInsertSchema(clubs).pick({
+  name: true,
+  description: true,
+  address: true,
+  city: true,
+  district: true,
+  latitude: true,
+  longitude: true,
+  phone: true,
+  managerId: true,
+  images: true,
+  facilities: true,
+  openingHours: true,
+  isActive: true,
+});
+
+export const updateClubSchema = createCoercedInsertSchema(clubs)
+  .pick({
+    name: true,
+    description: true,
+    address: true,
+    city: true,
+    district: true,
+    latitude: true,
+    longitude: true,
+    phone: true,
+    managerId: true,
+    images: true,
+    facilities: true,
+    openingHours: true,
+    isActive: true,
+  })
+  .partial();
+
+// Club Types
+export type Club = typeof clubs.$inferSelect;
+export type InsertClub = z.infer<typeof insertClubSchema>;
+export type UpdateClub = z.infer<typeof updateClubSchema>;
+
+// 场地定价表
+const timeSlotEnum = pgEnum("time_slot", ["morning", "afternoon", "evening", "night", "all_day"]);
+
+export const courtPricing = pgTable(
+  "court_pricing",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    courtId: varchar("court_id", { length: 36 }).notNull(),
+    timeSlot: timeSlotEnum("time_slot").notNull(),
+    startTime: varchar("start_time", { length: 5 }).notNull(),
+    endTime: varchar("end_time", { length: 5 }).notNull(),
+    singlesPrice: numeric("singles_price", { precision: 10, scale: 2 }).notNull(),
+    doublesPrice: numeric("doubles_price", { precision: 10, scale: 2 }).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    effectiveDate: date("effective_date").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => ({
+    courtIdx: index("court_pricing_court_idx").on(table.courtId),
+    timeSlotIdx: index("court_pricing_time_slot_idx").on(table.timeSlot),
+  })
+);
+
+// Court Pricing Schemas
+export const insertCourtPricingSchema = createCoercedInsertSchema(courtPricing).pick({
+  courtId: true,
+  timeSlot: true,
+  startTime: true,
+  endTime: true,
+  singlesPrice: true,
+  doublesPrice: true,
+  isActive: true,
+  effectiveDate: true,
+});
+
+export const updateCourtPricingSchema = createCoercedInsertSchema(courtPricing)
+  .pick({
+    timeSlot: true,
+    startTime: true,
+    endTime: true,
+    singlesPrice: true,
+    doublesPrice: true,
+    isActive: true,
+    effectiveDate: true,
+  })
+  .partial();
+
+// Court Pricing Types
+export type CourtPricing = typeof courtPricing.$inferSelect;
+export type InsertCourtPricing = z.infer<typeof insertCourtPricingSchema>;
+export type UpdateCourtPricing = z.infer<typeof updateCourtPricingSchema>;
+
+// 场地封锁表
+export const courtBlocks = pgTable(
+  "court_blocks",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    courtId: varchar("court_id", { length: 36 }).notNull(),
+    blockDate: date("block_date").notNull(),
+    startTime: varchar("start_time", { length: 5 }).notNull(),
+    endTime: varchar("end_time", { length: 5 }).notNull(),
+    reason: text("reason").notNull(),
+    blockedBy: varchar("blocked_by", { length: 36 }).notNull(),
+    isRecurring: boolean("is_recurring").default(false).notNull(),
+    recurrenceRule: jsonb("recurrence_rule"),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => ({
+    courtIdx: index("court_blocks_court_idx").on(table.courtId),
+    blockDateIdx: index("court_blocks_block_date_idx").on(table.blockDate),
+  })
+);
+
+// Court Block Schemas
+export const insertCourtBlockSchema = createCoercedInsertSchema(courtBlocks).pick({
+  courtId: true,
+  blockDate: true,
+  startTime: true,
+  endTime: true,
+  reason: true,
+  blockedBy: true,
+  isRecurring: true,
+  recurrenceRule: true,
+  isActive: true,
+});
+
+export const updateCourtBlockSchema = createCoercedInsertSchema(courtBlocks)
+  .pick({
+    reason: true,
+    isRecurring: true,
+    recurrenceRule: true,
+    isActive: true,
+  })
+  .partial();
+
+// Court Block Types
+export type CourtBlock = typeof courtBlocks.$inferSelect;
+export type InsertCourtBlock = z.infer<typeof insertCourtBlockSchema>;
+export type UpdateCourtBlock = z.infer<typeof updateCourtBlockSchema>;
+
+export type CourtBooking = typeof courtBookings.$inferSelect;
+export type InsertCourtBooking = z.infer<typeof insertCourtBookingSchema>;
+export type UpdateCourtBooking = z.infer<typeof updateCourtBookingSchema>;
+
+// ==================== 钱包相关表 ====================
+
+// 钱包表
+export const wallets = pgTable(
+  "wallets",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    balance: numeric("balance", { precision: 12, scale: 2 }).default("0").notNull(),
+    frozenAmount: numeric("frozen_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+    totalRecharged: numeric("total_recharged", { precision: 14, scale: 2 }).default("0").notNull(),
+    totalSpent: numeric("total_spent", { precision: 14, scale: 2 }).default("0").notNull(),
+    status: varchar("status", { length: 20 }).default("active").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => ({
+    userIdx: index("wallets_user_idx").on(table.userId).unique(),
+  })
+);
+
+// Wallet Schemas
+export const insertWalletSchema = createCoercedInsertSchema(wallets).pick({
+  userId: true,
+  balance: true,
+  status: true,
+});
+
+export const updateWalletSchema = createCoercedInsertSchema(wallets)
+  .pick({
+    balance: true,
+    frozenAmount: true,
+    totalRecharged: true,
+    totalSpent: true,
+    status: true,
+  })
+  .partial();
+
+// Wallet Types
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
+export type UpdateWallet = z.infer<typeof updateWalletSchema>;
+
+// 钱包交易记录表
+export const walletTransactions = pgTable(
+  "wallet_transactions",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    walletId: varchar("wallet_id", { length: 36 }).notNull(),
+    transactionNo: varchar("transaction_no", { length: 64 }),
+    type: varchar("type", { length: 20 }).notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    balanceBefore: numeric("balance_before", { precision: 12, scale: 2 }).notNull(),
+    balanceAfter: numeric("balance_after", { precision: 12, scale: 2 }).notNull(),
+    description: text("description"),
+    relatedOrderId: varchar("related_order_id", { length: 36 }),
+    relatedOrderType: varchar("related_order_type", { length: 20 }),
+    status: varchar("status", { length: 20 }).default("completed").notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index("wallet_transactions_user_idx").on(table.userId),
+    walletIdx: index("wallet_transactions_wallet_idx").on(table.walletId),
+    transactionNoIdx: index("wallet_transactions_transaction_no_idx").on(table.transactionNo),
+    typeIdx: index("wallet_transactions_type_idx").on(table.type),
+    createdAtIdx: index("wallet_transactions_created_at_idx").on(table.createdAt),
+  })
+);
+
+// Wallet Transaction Schemas
+export const insertWalletTransactionSchema = createCoercedInsertSchema(walletTransactions).pick({
+  userId: true,
+  walletId: true,
+  transactionNo: true,
+  type: true,
+  amount: true,
+  balanceBefore: true,
+  balanceAfter: true,
+  description: true,
+  relatedOrderId: true,
+  relatedOrderType: true,
+  status: true,
+  metadata: true,
+});
+
+export const updateWalletTransactionSchema = createCoercedInsertSchema(walletTransactions)
+  .pick({
+    status: true,
+    description: true,
+  })
+  .partial();
+
+// Wallet Transaction Types
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+export type UpdateWalletTransaction = z.infer<typeof updateWalletTransactionSchema>;

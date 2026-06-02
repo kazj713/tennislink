@@ -1,378 +1,904 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/Toast';
 
-interface Venue {
+interface Court {
   id: string;
+  courtNumber: number;
+  type: 'indoor' | 'outdoor' | 'mixed';
   name: string;
-  address: string;
-  phone?: string;
-  courts: number;
-  facilities: string[];
-  images: string[];
-  hours: string;
-  pricePerHour: number;
-  peakPricePerHour?: number;
-  rating: number;
-  reviewCount: number;
-  type: string;
-  city: string;
-  district: string;
+  clubId?: string;
+}
+
+interface TimeSlotData {
+  time: string;          // "07:00", "08:00"...
+  startTime: string;     // "07:00"
+  endTime: string;       // "07:59" (XX:00-XX:59格式)
+  priceType: 'normal' | 'peak' | 'offpeak' | 'discount';
+  basePrice: number;
+}
+
+interface CellStatus {
+  available: boolean;
+  selected: boolean;
+  sold: boolean;
+  price: number;
+  bookingId?: string;
+}
+
+interface SelectedSlot {
+  courtId: string;
+  courtName: string;
+  date: string;
+  timeRange: string;
+  startTime: string;
+  endTime: string;
+  price: number;
+  priceType: string;
+}
+
+interface WeatherInfo {
+  temperature: number;
+  condition: string;
+  icon: string;
+  humidity?: number;
+  windSpeed?: number;
+}
+
+interface DateCard {
+  date: Date;
+  dateStr: string;      // "2024-05-28"
+  displayStr: string;    // "05/28"
+  dayLabel: string;     // "今天", "明天", "周三"...
+  isToday: boolean;
+  isTomorrow: boolean;
 }
 
 export default function VenuesPage() {
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedVenue, setSelectedVenue] = useState('');
-  const [venues, setVenues] = useState<Venue[]>([]);
+  const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterDistrict, setFilterDistrict] = useState('');
-  const [filterType, setFilterType] = useState('');
+  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  const [dateCards, setDateCards] = useState<DateCard[]>([]);
+  const [weather, setWeather] = useState<WeatherInfo | null>(null);
+  const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'selected' | 'discount' | 'sold'>('all');
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [locationInfo, setLocationInfo] = useState<{ city: string; lat: number; lng: number } | null>(null);
   const { showToast } = useToast();
 
-  // 获取场地列表
+  // 时间范围：07:00 - 22:00
+  const TIME_START = 7;
+  const TIME_END = 22;
+
+  // 初始化数据
   useEffect(() => {
-    async function fetchVenues() {
-      try {
-        const response = await fetch('/api/venues');
-        if (!response.ok) throw new Error('获取场地列表失败');
-        const data = await response.json();
-        if (data.success && Array.isArray(data.data)) {
-          // 转换数据格式
-          const formattedVenues = data.data.map((venue: any) => ({
-            id: venue.id,
-            name: venue.name,
-            address: venue.address || '地址暂未提供',
-            phone: venue.phone,
-            courts: venue.courts || 4,
-            facilities: venue.facilities || ['标准球场'],
-            images: venue.images || [],
-            hours: venue.hours || '08:00 - 22:00',
-            pricePerHour: venue.pricePerHour || 100,
-            peakPricePerHour: venue.peakPricePerHour,
-            rating: venue.rating || 4.5,
-            reviewCount: venue.reviewCount || 0,
-            type: venue.type || 'outdoor',
-            city: venue.city || '北京',
-            district: venue.district || '朝阳区',
-          }));
-          setVenues(formattedVenues);
-        }
-      } catch (err) {
-        console.error('获取场地列表失败:', err);
-        showToast('获取场地列表失败', 'error');
-      } finally {
-        setLoading(false);
-      }
+    initializeData();
+  }, []);
+
+  // 初始化球场数据和日期卡片
+  const initializeData = async () => {
+    setLoading(true);
+    
+    try {
+      // 并行获取球场数据和生成日期卡片
+      await Promise.all([
+        fetchCourts(),
+        generateDateCards(),
+        requestGeolocation()
+      ]);
+      
+      // 获取天气信息
+      await fetchWeather();
+    } catch (error) {
+      console.error('初始化失败:', error);
+      showToast('加载数据失败', 'error');
+    } finally {
+      setLoading(false);
     }
-    fetchVenues();
-  }, [showToast]);
+  };
 
-  // 获取唯一的区域列表
-  const districts = [...new Set(venues.map(v => v.district))];
+  // 获取球场列表
+  const fetchCourts = async () => {
+    try {
+      const response = await fetch('/api/courts?limit=20');
+      if (!response.ok) throw new Error('获取球场列表失败');
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        const formattedCourts: Court[] = data.data.map((court: any, index: number) => ({
+          id: court.id || `court-${index + 1}`,
+          courtNumber: court.courtNumber || index + 1,
+          type: court.type || (index < 3 ? 'outdoor' : 'indoor'),
+          name: court.name || `${court.type === 'indoor' ? '室内' : '室外'}${index + 1}号场`,
+          clubId: court.clubId,
+        }));
+        
+        setCourts(formattedCourts.length > 0 ? formattedCourts : generateMockCourts());
+      } else {
+        setCourts(generateMockCourts());
+      }
+    } catch (error) {
+      console.error('获取球场失败:', error);
+      setCourts(generateMockCourts());
+    }
+  };
 
-  // 过滤场地
-  const filteredVenues = venues.filter((venue) => {
-    if (filterDistrict && venue.district !== filterDistrict) return false;
-    if (filterType && venue.type !== filterType) return false;
-    return true;
-  });
+  // 生成模拟球场数据（当API不可用时）
+  const generateMockCourts = (): Court[] => {
+    return Array.from({ length: 6 }, (_, i) => ({
+      id: `court-${i + 1}`,
+      courtNumber: i + 1,
+      type: i < 3 ? 'outdoor' as const : 'indoor' as const,
+      name: i < 3 ? `室外${i + 1}号场` : `室内${i - 2}号场`,
+    }));
+  };
 
-  // 生成时间段
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 8; hour <= 21; hour++) {
-      const isPeak = hour >= 10 && hour <= 20;
-      slots.push({
-        time: `${hour.toString().padStart(2, '0')}:00`,
-        available: Math.random() > 0.3, // 模拟可用性
-        priceType: isPeak ? 'peak' : 'base',
+  // 生成7天日期卡片
+  const generateDateCards = async () => {
+    const cards: DateCard[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      
+      let dayLabel = weekDays[date.getDay()];
+      if (i === 0) dayLabel = '今天';
+      else if (i === 1) dayLabel = '明天';
+
+      cards.push({
+        date,
+        dateStr: date.toISOString().split('T')[0],
+        displayStr: `${month}/${day}`,
+        dayLabel,
+        isToday: i === 0,
+        isTomorrow: i === 1,
       });
     }
+
+    setDateCards(cards);
+  };
+
+  // 获取天气信息
+  const fetchWeather = async () => {
+    try {
+      let url = '/api/weather';
+      if (locationInfo?.city) {
+        url += `?city=${encodeURIComponent(locationInfo.city)}`;
+      }
+      
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setWeather({
+            temperature: data.data.temperature || 25,
+            condition: data.data.condition || '晴',
+            icon: data.data.icon || '☀️',
+            humidity: data.data.humidity,
+            windSpeed: data.data.windSpeed,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('获取天气失败:', error);
+      // 天气获取失败不阻断主流程
+    }
+  };
+
+  // GPS定位请求
+  const requestGeolocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus('error');
+      return;
+    }
+
+    setLocationStatus('loading');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocationInfo({
+          city: '',
+          lat: latitude,
+          lng: longitude,
+        });
+        setLocationStatus('success');
+        
+        // 反向地理编码获取城市名称（简化版）
+        reverseGeocode(latitude, longitude);
+      },
+      (error) => {
+        console.warn('定位失败:', error.message);
+        setLocationStatus('error');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000, // 5分钟缓存
+      }
+    );
+  }, []);
+
+  // 简单的反向地理编码（实际项目中应调用高德API）
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      // 这里可以调用高德地图的逆地理编码API
+      // 暂时使用默认城市名
+      setLocationInfo(prev => prev ? { ...prev, city: '北京市' } : null);
+    } catch (error) {
+      console.error('反向地理编码失败:', error);
+    }
+  };
+
+  // 生成时间段数据
+  const generateTimeSlots = (): TimeSlotData[] => {
+    const slots: TimeSlotData[] = [];
+    
+    for (let hour = TIME_START; hour <= TIME_END; hour++) {
+      const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+      const endTime = `${hour.toString().padStart(2, '0')}:59`;
+      
+      // 判断价格类型
+      let priceType: 'normal' | 'peak' | 'offpeak' | 'discount' = 'normal';
+      let basePrice = 100;
+
+      if (hour >= 10 && hour <= 17) {
+        priceType = 'peak';
+        basePrice = 150;
+      } else if (hour >= 8 && hour <= 9) {
+        priceType = 'offpeak';
+        basePrice = 80;
+      } else if (hour >= 18 && hour <= 19) {
+        priceType = 'discount'; // 晚间折扣
+        basePrice = 90;
+      }
+
+      slots.push({
+        time: timeStr,
+        startTime: timeStr,
+        endTime,
+        priceType,
+        basePrice,
+      });
+    }
+
     return slots;
   };
 
   const timeSlots = generateTimeSlots();
 
-  // 获取渐变色（基于场地ID）
-  const getGradient = (id: string) => {
-    const gradients = [
-      'from-blue-400 to-blue-600',
-      'from-blue-400 to-blue-600',
-      'from-purple-400 to-purple-600',
-      'from-red-400 to-red-600',
-      'from-yellow-400 to-yellow-600',
-      'from-indigo-400 to-indigo-600',
-    ];
-    const index = id.charCodeAt(0) % gradients.length;
-    return gradients[index];
+  // 获取当前选中日期
+  const selectedDate = dateCards[selectedDateIndex]?.dateStr || '';
+
+  // 计算单元格状态
+  const getCellStatus = useCallback((courtId: string, startTime: string): CellStatus => {
+    // 检查是否已选中
+    const isSelected = selectedSlots.some(
+      slot => slot.courtId === courtId && slot.startTime === startTime && slot.date === selectedDate
+    );
+
+    if (isSelected) {
+      return {
+        available: true,
+        selected: true,
+        sold: false,
+        price: 0,
+      };
+    }
+
+    // 获取该时段的基础价格信息
+    const timeSlot = timeSlots.find(ts => ts.startTime === startTime);
+    const price = timeSlot?.basePrice || 100;
+
+    // 模拟售罄状态（随机或基于业务逻辑）
+    // 这里使用简单的随机逻辑，实际应从API获取
+    const isSold = Math.random() > 0.85; // 15%概率已售罄
+
+    return {
+      available: !isSold,
+      selected: false,
+      sold: isSold,
+      price,
+    };
+  }, [selectedSlots, selectedDate, timeSlots]);
+
+  // 切换单元格选择状态
+  const toggleCellSelection = (court: Court, timeSlot: TimeSlotData) => {
+    const cellStatus = getCellStatus(court.id, timeSlot.startTime);
+    
+    if (cellStatus.sold) return; // 已售罄不可选
+
+    const existingIndex = selectedSlots.findIndex(
+      slot => slot.courtId === court.id && 
+              slot.startTime === timeSlot.startTime && 
+              slot.date === selectedDate
+    );
+
+    if (existingIndex >= 0) {
+      // 取消选择
+      setSelectedSlots(prev => prev.filter((_, index) => index !== existingIndex));
+    } else {
+      // 添加选择
+      const newSlot: SelectedSlot = {
+        courtId: court.id,
+        courtName: court.name,
+        date: selectedDate,
+        timeRange: `${timeSlot.startTime}-${timeSlot.endTime}`,
+        startTime: timeSlot.startTime,
+        endTime: timeSlot.endTime,
+        price: timeSlot.basePrice,
+        priceType: timeSlot.priceType,
+      };
+      setSelectedSlots(prev => [...prev, newSlot]);
+    }
   };
 
+  // 移除单个已选项
+  const removeSelectedSlot = (index: number) => {
+    setSelectedSlots(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // 清空所有选择
+  const clearAllSelections = () => {
+    setSelectedSlots([]);
+  };
+
+  // 计算总金额
+  const calculateTotalAmount = (): number => {
+    return selectedSlots.reduce((total, slot) => total + slot.price, 0);
+  };
+
+  // 提交预订
+  const handleBooking = async () => {
+    if (selectedSlots.length === 0) {
+      showToast('请至少选择一个时段', 'warning');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      if (!token) {
+        showToast('请先登录后再进行预订', 'error');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
+        return;
+      }
+
+      // 使用AbortController设置超时
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+
+      try {
+        const response = await fetch('/api/court-bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            bookings: selectedSlots.map(slot => ({
+              courtId: slot.courtId,
+              bookingDate: slot.date,
+              startTime: slot.startTime,
+              endTime: slot.endTime,
+              totalHours: 1,
+              totalAmount: slot.price,
+              notes: `场地预订: ${slot.courtName} ${slot.timeRange}`,
+            })),
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        // 缓存JSON结果避免重复解析
+        let responseData;
+        try {
+          responseData = await response.json();
+        } catch (jsonError) {
+          throw new Error('服务器响应异常，请稍后重试');
+        }
+
+        if (!response.ok) {
+          const errorMessage = responseData?.error || responseData?.message || '预订失败';
+          throw new Error(errorMessage);
+        }
+
+        showToast(`成功预订${selectedSlots.length}个时段！`, 'success');
+        
+        // 清空选择
+        setTimeout(() => {
+          clearAllSelections();
+        }, 2000);
+
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        
+        if (fetchError.name === 'AbortError') {
+          throw new Error('请求超时，请检查网络后重试');
+        }
+        throw fetchError;
+      }
+
+    } catch (error: any) {
+      console.error('预订失败:', error);
+      const userFriendlyMessage = error.message.includes('JSON') || 
+                                  error.message.includes('json') ||
+                                  error.message.includes('Unexpected')
+                                ? '预订失败，请检查网络连接后重试'
+                                : error.message || '预订失败，请稍后重试';
+      showToast(userFriendlyMessage, 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 获取单元格样式类名
+  const getCellStyle = (cellStatus: CellStatus, timeSlot: TimeSlotData): string => {
+    if (cellStatus.selected) {
+      return 'bg-[#1a5442] text-white border-[#1a5442] shadow-lg cursor-pointer hover:bg-[#236b54] transition-all';
+    }
+    
+    if (cellStatus.sold) {
+      return 'bg-gray-500/30 text-gray-400/60 cursor-not-allowed line-through border-gray-500/20';
+    }
+
+    switch (timeSlot.priceType) {
+      case 'peak':
+        return 'bg-yellow-400/25 text-yellow-900 border-yellow-500/30 cursor-pointer hover:bg-yellow-400/35 transition-all';
+      case 'offpeak':
+        return 'bg-green-400/20 text-green-900 border-green-400/30 cursor-pointer hover:bg-green-400/30 transition-all';
+      case 'discount':
+        return 'bg-orange-400/30 text-orange-900 border-orange-500/40 cursor-pointer hover:bg-orange-400/40 transition-all';
+      default:
+        return 'bg-[rgba(210,190,170,0.35)] text-gray-800 border-white/10 cursor-pointer hover:bg-[rgba(210,190,170,0.5)] transition-all';
+    }
+  };
+
+  // 根据筛选条件过滤显示
+  const shouldShowCell = (cellStatus: CellStatus, timeSlot: TimeSlotData): boolean => {
+    switch (filterType) {
+      case 'selected':
+        return cellStatus.selected;
+      case 'sold':
+        return cellStatus.sold;
+      case 'discount':
+        return !cellStatus.sold && !cellStatus.selected && timeSlot.priceType === 'discount';
+      default:
+        return true;
+    }
+  };
+
+  // 统计信息
+  const totalAvailableSlots = courts.length * timeSlots.length;
+  const selectedCount = selectedSlots.filter(s => s.date === selectedDate).length;
+  const earliestAvailableTime = timeSlots[0]?.startTime || '07:00';
+
+  // 加载状态
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-16 pb-16 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#2d5a4a] via-[#5a8b70] to-[#a08060] pt-16 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载场地列表...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white/90 text-lg">正在加载场地信息...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 pb-16">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">预约场地</h1>
-          <p className="text-xl text-blue-100">
-            选择合适的场地，享受愉快的网球时光
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-[#2d5a4a] via-[#5a8b70] to-[#a08060] pb-24">
+      {/* 顶部标题区域 */}
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 text-white pt-8 pb-6">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2">预约场地</h1>
+              <p className="text-base text-white/80">选择合适的时段，享受愉快的网球时光</p>
+            </div>
+            
+            {/* GPS定位按钮 */}
+            <button
+              onClick={requestGeolocation}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm border transition-all ${
+                locationStatus === 'success'
+                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100'
+                  : locationStatus === 'loading'
+                  ? 'bg-blue-500/20 border-blue-400/40 text-blue-100'
+                  : locationStatus === 'error'
+                  ? 'bg-red-500/20 border-red-400/40 text-red-100'
+                  : 'bg-white/10 border-white/30 text-white/90 hover:bg-white/15'
+              }`}
+            >
+              {locationStatus === 'success' ? (
+                <>
+                  <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">已定位</span>
+                </>
+              ) : locationStatus === 'loading' ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="text-sm font-medium">定位中...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">未定位</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* 定位成功后显示城市信息 */}
+          {locationStatus === 'success' && locationInfo?.city && (
+            <p className="mt-2 text-sm text-white/70">
+              📍 当前位置：{locationInfo.city}
+            </p>
+          )}
+          
+          {locationStatus === 'error' && (
+            <p className="mt-2 text-xs text-red-200">
+              定位失败，点击重试或手动输入城市
+            </p>
+          )}
         </div>
       </div>
 
-      {/* 筛选器 */}
-      <div className="bg-white border-b sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-wrap gap-4 items-center">
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-            <select
-              value={filterDistrict}
-              onChange={(e) => setFilterDistrict(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+      {/* 日期选择器 */}
+      <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 sticky top-16 z-40">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-3">
+            {/* 左箭头 */}
+            <button 
+              onClick={() => setSelectedDateIndex(Math.max(0, selectedDateIndex - 1))}
+              disabled={selectedDateIndex === 0}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
-              <option value="">全部区域</option>
-              {districts.map((district) => (
-                <option key={district} value={district}>{district}</option>
-              ))}
-            </select>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* 日期卡片横向滚动容器 */}
+            <div className="flex-1 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-3 min-w-max">
+                {dateCards.map((card, index) => (
+                  <button
+                    key={card.dateStr}
+                    onClick={() => setSelectedDateIndex(index)}
+                    className={`flex-shrink-0 px-5 py-3 rounded-xl border-2 transition-all transform hover:scale-105 ${
+                      selectedDateIndex === index
+                        ? 'bg-white/20 border-white/50 text-white shadow-lg scale-105'
+                        : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className={`text-xs font-medium mb-1 ${
+                        card.isToday ? 'text-yellow-300' : card.isTomorrow ? 'text-blue-200' : 'text-white/60'
+                      }`}>
+                        {card.dayLabel}
+                      </div>
+                      <div className="text-lg font-bold">{card.displayStr}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 右箭头 */}
+            <button 
+              onClick={() => setSelectedDateIndex(Math.min(dateCards.length - 1, selectedDateIndex + 1))}
+              disabled={selectedDateIndex === dateCards.length - 1}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
-              <option value="">全部类型</option>
-              <option value="indoor">室内球场</option>
-              <option value="outdoor">室外球场</option>
-              <option value="mixed">混合</option>
-            </select>
-            <button
-              onClick={() => {
-                setFilterDistrict('');
-                setFilterType('');
-              }}
-              className="px-6 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold"
-            >
-              重置筛选
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </div>
       </div>
 
-      {/* 场地列表 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {filteredVenues.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">没有找到符合条件的场地</p>
-            <button
-              onClick={() => {
-                setFilterDistrict('');
-                setFilterType('');
-              }}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              清除筛选条件
-            </button>
+      {/* 天气信息栏 */}
+      {weather && (
+        <div className="bg-white/5 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-4 text-white/90">
+              <span className="text-2xl">{weather.icon}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-lg">{weather.temperature}°C</span>
+                <span className="text-white/70">{weather.condition}</span>
+                {weather.humidity && <span className="text-sm text-white/60">湿度 {weather.humidity}%</span>}
+              </div>
+              <div className="ml-auto text-sm text-white/60">
+                {dateCards[selectedDateIndex]?.dateStr}
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* 场地列表 */}
-            <div className="space-y-6">
-              {filteredVenues.map((venue) => (
-                <div
-                  key={venue.id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setSelectedVenue(venue.id)}
+        </div>
+      )}
+
+      {/* 状态筛选标签栏 */}
+      <div className="bg-white/5 backdrop-blur-sm border-b border-white/10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              {[
+                { key: 'all', label: '可预订', count: null },
+                { key: 'selected', label: '已选', count: selectedCount },
+                { key: 'discount', label: '折扣', count: null },
+                { key: 'sold', label: '已售', count: null },
+              ].map(({ key, label, count }) => (
+                <button
+                  key={key}
+                  onClick={() => setFilterType(key as typeof filterType)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    filterType === key
+                      ? 'bg-white/20 text-white border border-white/30'
+                      : 'bg-white/5 text-white/70 hover:bg-white/10 border border-transparent'
+                  }`}
                 >
-                  {/* 图片 */}
-                  <div className={`aspect-video bg-gradient-to-br ${getGradient(venue.id)} flex items-center justify-center`}>
-                    <span className="text-white/30 text-6xl font-bold">{venue.name[0]}</span>
-                  </div>
-
-                  {/* 信息 */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{venue.name}</h3>
-                        <p className="text-gray-600">{venue.address}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span className="font-semibold text-gray-900">{venue.rating.toFixed(1)}</span>
-                        <span className="text-gray-500">({venue.reviewCount})</span>
-                      </div>
-                    </div>
-
-                    {/* 设施标签 */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {venue.facilities.slice(0, 4).map((facility) => (
-                        <span
-                          key={facility}
-                          className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full"
-                        >
-                          {facility}
-                        </span>
-                      ))}
-                      {venue.facilities.length > 4 && (
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                          +{venue.facilities.length - 4}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* 底部信息 */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span>{venue.courts} 个球场</span>
-                        <span>{venue.hours}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600">
-                          ¥{venue.pricePerHour}
-                          <span className="text-sm font-normal text-gray-500">/小时起</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  {label}
+                  {count !== null && count > 0 && (
+                    <span className="ml-2 px-2 py-0.5 bg-yellow-400/80 text-gray-900 rounded-full text-xs font-bold">
+                      {count}
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
 
-            {/* 时间选择面板 */}
-            {selectedVenue && (
-              <div className="lg:sticky lg:top-24 h-fit">
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    {venues.find((v) => v.id === selectedVenue)?.name}
-                  </h3>
+            {/* 场地统计 */}
+            <div className="text-sm text-white/70 hidden sm:block">
+              <span className="font-semibold text-white/90">{courts.length}</span> 条场地 | 从{' '}
+              <span className="font-semibold text-white/90">{earliestAvailableTime}</span> 可预订
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  {/* 日期选择 */}
-                  {!selectedDate && (
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        选择日期
-                      </label>
-                      <input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
-                  )}
-
-                  {selectedDate && (
-                    <>
-                      {/* 时间段 */}
-                      <div className="mb-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-medium text-gray-700">
-                            可选时段
-                          </label>
-                          <div className="flex items-center gap-3 text-sm">
-                            <span className="flex items-center gap-1">
-                              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                              普通
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                              高峰
-                            </span>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {timeSlots.map((slot) => {
-                            const venue = venues.find((v) => v.id === selectedVenue);
-                            const price = slot.priceType === 'peak'
-                              ? (venue?.peakPricePerHour || venue?.pricePerHour || 100)
-                              : (venue?.pricePerHour || 100);
-                            return (
-                              <button
-                                key={slot.time}
-                                disabled={!slot.available}
-                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                                  !slot.available
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : slot.priceType === 'peak'
-                                    ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                }`}
-                              >
-                                <div>{slot.time}</div>
-                                {slot.available && <div className="text-xs mt-1">¥{price}</div>}
-                              </button>
-                            );
-                          })}
-                        </div>
+      {/* 主内容区：时间表网格 */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
+          {/* 时间表网格 */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  {/* 左上角空白单元格 */}
+                  <th className="sticky left-0 bg-[#2d5a4a]/95 backdrop-blur-md p-3 text-white/80 text-sm font-semibold border-r border-b border-white/10 min-w-[80px] z-20">
+                    时间
+                  </th>
+                  
+                  {/* 球场列头 */}
+                  {courts.map((court) => (
+                    <th
+                      key={court.id}
+                      className="p-3 text-center min-w-[120px] border-r border-b border-white/10"
+                    >
+                      <div className="text-white font-bold text-sm">{court.name}</div>
+                      <div className={`text-xs mt-1 px-2 py-0.5 rounded inline-block ${
+                        court.type === 'outdoor' 
+                          ? 'bg-sky-400/30 text-sky-100' 
+                          : 'bg-purple-400/30 text-purple-100'
+                      }`}>
+                        {court.type === 'outdoor' ? '室外' : '室内'}
                       </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              
+              <tbody>
+                {timeSlots.map((timeSlot, rowIndex) => (
+                  <tr key={timeSlot.startTime} className="group">
+                    {/* 时间段行头 */}
+                    <td className="sticky left-0 bg-[#2d5a4a]/90 backdrop-blur-md p-2 text-white/90 text-xs font-mono font-semibold border-r border-b border-white/10 z-10">
+                      {timeSlot.startTime}-{timeSlot.endTime}
+                    </td>
+                    
+                    {/* 球场单元格 */}
+                    {courts.map((court) => {
+                      const cellStatus = getCellStatus(court.id, timeSlot.startTime);
+                      
+                      if (!shouldShowCell(cellStatus, timeSlot)) {
+                        return (
+                          <td
+                            key={`${court.id}-${timeSlot.startTime}`}
+                            className="p-1 border-r border-b border-white/5"
+                          >
+                            <div className="h-14 opacity-0"></div>
+                          </td>
+                        );
+                      }
 
-                      {/* 设施详情 */}
-                      <div className="mb-6">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">
-                          场地设施
-                        </h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {venues
-                            .find((v) => v.id === selectedVenue)
-                            ?.facilities.map((facility) => (
-                              <div
-                                key={facility}
-                                className="flex items-center gap-2 text-sm text-gray-600"
-                              >
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                {facility}
+                      return (
+                        <td
+                          key={`${court.id}-${timeSlot.startTime}`}
+                          className="p-1 border-r border-b border-white/5"
+                        >
+                          <button
+                            onClick={() => toggleCellSelection(court, timeSlot)}
+                            disabled={cellStatus.sold}
+                            className={`w-full h-14 rounded-lg border px-2 py-1 text-center relative overflow-hidden ${getCellStyle(cellStatus, timeSlot)}`}
+                          >
+                            {/* 价格显示 */}
+                            <div className="text-xs font-bold">
+                              ¥{cellStatus.price}
+                            </div>
+                            
+                            {/* 价格类型标签 */}
+                            {!cellStatus.selected && !cellStatus.sold && timeSlot.priceType !== 'normal' && (
+                              <div className={`text-[10px] font-medium mt-0.5 ${
+                                timeSlot.priceType === 'peak' ? 'text-yellow-700' :
+                                timeSlot.priceType === 'discount' ? 'text-orange-700' : 'text-green-700'
+                              }`}>
+                                {timeSlot.priceType === 'peak' ? '🔥高峰' : 
+                                 timeSlot.priceType === 'discount' ? '🏷️折扣' : '💰优惠'}
                               </div>
-                            ))}
-                        </div>
-                      </div>
+                            )}
 
-                      {/* 联系信息 */}
-                      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">电话:</span>{' '}
-                          {venues.find((v) => v.id === selectedVenue)?.phone || '暂无'}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          <span className="font-medium">营业时间:</span>{' '}
-                          {venues.find((v) => v.id === selectedVenue)?.hours}
-                        </div>
-                      </div>
+                            {/* 已选中指示器 */}
+                            {cellStatus.selected && (
+                              <div className="absolute top-1 right-1 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                            )}
 
-                      {/* 预约按钮 */}
-                      <Link
-                        href="/booking"
-                        className="block w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center"
+                            {/* 售罄标记 */}
+                            {cellStatus.sold && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-bold">✕</span>
+                              </div>
+                            )}
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 图例说明 */}
+          <div className="border-t border-white/20 p-4 bg-black/10">
+            <div className="flex flex-wrap gap-4 justify-center text-xs text-white/70">
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-[rgba(210,190,170,0.35)] border border-white/10"></div>
+                可预订普通时段
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-yellow-400/25 border border-yellow-500/30"></div>
+                高峰时段
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-[#1a5442] border border-[#1a5442]"></div>
+                已选中
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-orange-400/30 border border-orange-500/40"></div>
+                折扣时段
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gray-500/30 border border-gray-500/20"></div>
+                已售罄
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 底部固定预订面板 */}
+      {selectedSlots.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-2xl z-50">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between gap-4">
+              {/* 已选时段列表（可折叠） */}
+              <div className="flex-1 max-w-2xl">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    已选 {selectedSlots.length} 个时段
+                  </h3>
+                  <button
+                    onClick={clearAllSelections}
+                    className="text-xs text-red-600 hover:text-red-700 font-medium underline"
+                  >
+                    清空全部
+                  </button>
+                </div>
+                
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide max-h-20">
+                  {selectedSlots.map((slot, index) => (
+                    <div
+                      key={index}
+                      className="flex-shrink-0 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg px-3 py-2 relative group"
+                    >
+                      <button
+                        onClick={() => removeSelectedSlot(index)}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
                       >
-                        去预约
-                      </Link>
-                    </>
-                  )}
+                        ✕
+                      </button>
+                      
+                      <div className="text-xs font-semibold text-gray-800 pr-4">
+                        {slot.courtName}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {slot.timeRange}
+                      </div>
+                      <div className="text-sm font-bold text-emerald-600 mt-1">
+                        ¥{slot.price}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
+
+              {/* 总计和预订按钮 */}
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="text-right">
+                  <div className="text-xs text-gray-500">总计</div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    ¥{calculateTotalAmount()}
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleBooking}
+                  disabled={isSubmitting}
+                  className={`px-8 py-3 rounded-xl font-bold text-lg whitespace-nowrap transition-all transform hover:scale-105 active:scale-95 ${
+                    isSubmitting
+                      ? 'bg-gray-400 text-white cursor-wait'
+                      : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg hover:shadow-xl hover:from-emerald-500 hover:to-teal-500'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      提交中...
+                    </span>
+                  ) : (
+                    `立即预订 (¥${calculateTotalAmount()})`
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {/* 内联样式定义隐藏滚动条 */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
+

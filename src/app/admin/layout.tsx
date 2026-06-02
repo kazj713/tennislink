@@ -68,17 +68,17 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgba(20,40,35,0.95)' }}>
         <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
-          <p className="mt-4 text-gray-600">验证身份中...</p>
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-400" />
+          <p className="mt-4 text-white/70">验证身份中...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'rgba(20,40,35,0.95)' }}>
       {/* 移动端头部 */}
       <div className="lg:hidden bg-blue-600 text-white p-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">后台管理系统</h1>
@@ -95,16 +95,17 @@ export default function AdminLayout({
         <aside
           className={`
             fixed lg:static inset-y-0 left-0 z-50
-            w-64 bg-white border-r border-gray-200
+            w-64 border-r border-white/10
             transform transition-transform duration-300 ease-in-out
             ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             lg:block
           `}
+          style={{ background: 'rgba(15,30,25,0.98)' }}
         >
           <div className="h-full flex flex-col">
             {/* Logo */}
-            <div className="hidden lg:flex items-center justify-center h-16 border-b border-gray-200">
-              <h1 className="text-xl font-bold text-blue-600">
+            <div className="hidden lg:flex items-center justify-center h-16 border-b border-white/10">
+              <h1 className="text-xl font-bold text-blue-400">
                 后台管理系统
               </h1>
             </div>
@@ -114,7 +115,7 @@ export default function AdminLayout({
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                
+
                 return (
                   <Link
                     key={item.href}
@@ -123,8 +124,8 @@ export default function AdminLayout({
                     className={`
                       flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                       ${isActive
-                        ? "bg-blue-50 text-blue-600 font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
+                        ? "bg-blue-500/20 text-blue-400 font-medium"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
                       }
                     `}
                   >
@@ -136,13 +137,13 @@ export default function AdminLayout({
             </nav>
 
             {/* 退出登录 */}
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-white/10">
               <button
                 onClick={() => {
                   localStorage.removeItem("token");
                   window.location.href = "/login";
                 }}
-                className="flex items-center gap-3 px-4 py-3 w-full text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
               >
                 <LogOut size={20} />
                 <span>退出登录</span>

@@ -54,20 +54,20 @@ export default function AdminUsersPage() {
     switch (role) {
       case "admin":
         return (
-          <span className="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full flex items-center gap-1">
+          <span className="px-3 py-1 text-sm rounded-full flex items-center gap-1" style={{ background: 'rgba(220,53,69,0.2)', color: '#f87171', border: '1px solid rgba(220,53,69,0.3)' }}>
             <Shield size={14} />
             管理员
           </span>
         );
       case "coach":
         return (
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' }}>
             教练
           </span>
         );
       case "student":
         return (
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+          <span className="px-3 py-1 text-sm rounded-full" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' }}>
             学员
           </span>
         );
@@ -79,7 +79,7 @@ export default function AdminUsersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-white/55">加载中...</div>
       </div>
     );
   }
@@ -88,65 +88,73 @@ export default function AdminUsersPage() {
     <div>
       {/* 页面标题 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">用户管理</h1>
-        <p className="text-gray-600 mt-2">查看和管理平台用户</p>
+        <h1 className="text-3xl font-bold text-white">用户管理</h1>
+        <p className="text-white/70 mt-2">查看和管理平台用户</p>
       </div>
 
       {/* 筛选和搜索 */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+      <div className="rounded-xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex flex-col md:flex-row gap-4">
           {/* 搜索 */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={20} />
             <input
               type="text"
               placeholder="搜索用户姓名或邮箱..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 rounded-lg outline-none text-white placeholder-white/40"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
             />
           </div>
 
           {/* 筛选 */}
           <div className="flex items-center gap-2">
-            <Filter size={20} className="text-gray-400" />
+            <Filter size={20} className="text-white/40" />
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 rounded-lg outline-none text-white"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <option value="all">全部角色</option>
-              <option value="student">学员</option>
-              <option value="coach">教练</option>
-              <option value="admin">管理员</option>
+              <option value="all" style={{ color: '#000', background: '#fff' }}>全部角色</option>
+              <option value="student" style={{ color: '#000', background: '#fff' }}>学员</option>
+              <option value="coach" style={{ color: '#000', background: '#fff' }}>教练</option>
+              <option value="admin" style={{ color: '#000', background: '#fff' }}>管理员</option>
             </select>
           </div>
         </div>
       </div>
 
       {/* 用户列表 */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead style={{ background: 'rgba(30,50,42,0.5)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
               <tr>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">用户信息</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">角色</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">联系方式</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">城市</th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">注册时间</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">用户信息</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">角色</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">联系方式</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">城市</th>
+                <th className="text-left py-4 px-6 font-semibold text-white/80">注册时间</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-gray-500">
+                  <td colSpan={5} className="py-12 text-center text-white/55">
                     没有找到匹配的用户
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                filteredUsers.map((user, index) => (
+                  <tr
+                    key={user.id}
+                    className="border-b border-white/5 transition-colors"
+                    style={{ background: index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'}
+                  >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         {user.avatar ? (
@@ -158,15 +166,15 @@ export default function AdminUsersPage() {
                             className="w-12 h-12 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User className="text-blue-600" size={24} />
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.2)' }}>
+                            <User className="text-blue-400" size={24} />
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold text-gray-900">{user.name}</p>
-                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <p className="font-semibold text-white">{user.name}</p>
+                          <p className="text-sm text-white/70">{user.email}</p>
                           {user.skillLevel && (
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-white/50">
                               技能等级: {user.skillLevel}/10
                             </p>
                           )}
@@ -176,16 +184,16 @@ export default function AdminUsersPage() {
                     <td className="py-4 px-6">{getRoleBadge(user.role)}</td>
                     <td className="py-4 px-6">
                       {user.phone ? (
-                        <p className="text-gray-900">{user.phone}</p>
+                        <p className="text-white/90">{user.phone}</p>
                       ) : (
-                        <p className="text-gray-400">未填写</p>
+                        <p className="text-white/40">未填写</p>
                       )}
                     </td>
                     <td className="py-4 px-6">
-                      <p className="text-gray-900">{user.city || "未填写"}</p>
+                      <p className="text-white/90">{user.city || "未填写"}</p>
                     </td>
                     <td className="py-4 px-6">
-                      <p className="text-gray-600">
+                      <p className="text-white/60">
                         {new Date(user.createdAt).toLocaleDateString("zh-CN")}
                       </p>
                     </td>

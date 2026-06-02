@@ -169,7 +169,7 @@ export default function SystemSettings() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">系统设置</h1>
+        <h1 className="text-2xl font-bold text-white">系统设置</h1>
         <button
           onClick={handleSave}
           disabled={isSaving}
@@ -193,22 +193,38 @@ export default function SystemSettings() {
 
       {/* 保存成功提示 */}
       {saveSuccess && (
-        <div className="flex items-center gap-2 mb-6 px-4 py-3 bg-blue-100 text-blue-800 rounded-lg">
-          <Check className="w-5 h-5" />
-          <span>设置保存成功！</span>
+        <div className="flex items-center gap-2 mb-6 px-4 py-3 rounded-lg" style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.3)' }}>
+          <Check className="w-5 h-5" style={{ color: '#93c5fd' }} />
+          <span style={{ color: '#93c5fd' }}>设置保存成功！</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* 侧边栏 */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="rounded-lg" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <nav className="p-4 space-y-1">
               {Object.values(settings).map(section => (
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${activeSection === section.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${activeSection === section.id ? '' : ''}`}
+                  style={activeSection === section.id
+                    ? { background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }
+                    : { color: 'rgba(255,255,255,0.7)' }
+                  }
+                  onMouseEnter={(e) => {
+                    if (activeSection !== section.id) {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeSection !== section.id) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                    }
+                  }}
                 >
                   {section.icon}
                   <span className="font-medium">{section.title}</span>
@@ -220,66 +236,70 @@ export default function SystemSettings() {
 
         {/* 设置内容 */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">{settings[activeSection].title}</h2>
-            
+          <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h2 className="text-xl font-semibold text-white mb-6">{settings[activeSection].title}</h2>
+
             <div className="space-y-6">
               {settings[activeSection].settings.map(setting => (
                 <div key={setting.id} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className={`font-medium ${setting.required ? 'text-red-600' : 'text-gray-700'}`}>
+                    <label className={`font-medium ${setting.required ? '' : ''}`} style={{ color: setting.required ? '#f87171' : 'rgba(255,255,255,0.85)' }}>
                       {setting.label}
                       {setting.required && <span className="ml-1">*</span>}
                     </label>
                   </div>
-                  
+
                   {setting.type === 'text' && (
                     <input
                       type="text"
                       value={setting.value as string}
                       onChange={(e) => handleSettingChange(activeSection, setting.id, e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-2 rounded-lg outline-none text-white placeholder-white/40"
+                      style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
                       placeholder={setting.description}
                     />
                   )}
-                  
+
                   {setting.type === 'number' && (
                     <input
                       type="number"
                       value={setting.value as number}
                       onChange={(e) => handleSettingChange(activeSection, setting.id, parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-2 rounded-lg outline-none text-white placeholder-white/40"
+                      style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
                       placeholder={setting.description}
                     />
                   )}
-                  
+
                   {setting.type === 'boolean' && (
                     <div className="flex items-center">
                       <input
                         type="checkbox"
                         checked={setting.value as boolean}
                         onChange={(e) => handleSettingChange(activeSection, setting.id, e.target.checked)}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 rounded"
+                        style={{ accentColor: '#3b82f6' }}
                       />
                     </div>
                   )}
-                  
+
                   {setting.type === 'select' && setting.options && (
                     <select
                       value={setting.value as string | number}
                       onChange={(e) => handleSettingChange(activeSection, setting.id, e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-2 rounded-lg outline-none text-white"
+                      style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)' }}
                     >
                       {setting.options.map(option => (
-                        <option key={option.value as string | number} value={option.value as string | number}>
+                        <option key={option.value as string | number} value={option.value as string | number} style={{ color: '#000', background: '#fff' }}>
                           {option.label}
                         </option>
                       ))}
                     </select>
                   )}
-                  
+
                   {setting.description && (
-                    <p className="text-sm text-gray-500">{setting.description}</p>
+                    <p className="text-sm text-white/50">{setting.description}</p>
                   )}
                 </div>
               ))}

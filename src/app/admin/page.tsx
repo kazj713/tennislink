@@ -96,7 +96,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-white/55">加载中...</div>
       </div>
     );
   }
@@ -105,8 +105,8 @@ export default function AdminDashboard() {
     <div>
       {/* 页面标题 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">数据看板</h1>
-        <p className="text-gray-600 mt-2">欢迎使用 Tennis Link 后台管理系统</p>
+        <h1 className="text-3xl font-bold text-white">数据看板</h1>
+        <p className="text-white/70 mt-2">欢迎使用 Tennis Link 后台管理系统</p>
       </div>
 
       {/* 统计卡片 */}
@@ -116,15 +116,16 @@ export default function AdminDashboard() {
           return (
             <div
               key={card.title}
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
+              className="rounded-xl p-6"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">{card.title}</p>
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+                  <p className="text-sm text-white/70 mb-1">{card.title}</p>
+                  <p className="text-3xl font-bold text-white">{card.value}</p>
                 </div>
-                <div className={`${card.bgColor} p-3 rounded-lg`}>
-                  <Icon size={24} className={card.color.replace("bg-", "text-")} />
+                <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  <Icon size={24} className="text-blue-400" />
                 </div>
               </div>
             </div>
@@ -133,39 +134,66 @@ export default function AdminDashboard() {
       </div>
 
       {/* 快捷操作 */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">快捷操作</h2>
+      <div className="rounded-xl p-6" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <h2 className="text-lg font-semibold text-white mb-4">快捷操作</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <a
             href="/admin/coaches"
-            className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg transition-colors"
+            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(59,130,246,0.5)';
+              e.currentTarget.style.background = 'rgba(59,130,246,0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+              e.currentTarget.style.background = 'transparent';
+            }}
           >
-            <UserCheck className="text-blue-600" size={20} />
+            <UserCheck className="text-blue-400" size={20} />
             <div>
-              <p className="font-medium text-gray-900">教练审核</p>
-              <p className="text-sm text-gray-600">
+              <p className="font-medium text-white">教练审核</p>
+              <p className="text-sm text-white/60">
                 {stats.pendingCoachApprovals} 位教练待审核
               </p>
             </div>
           </a>
           <a
             href="/admin/venues"
-            className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg transition-colors"
+            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(168,85,247,0.5)';
+              e.currentTarget.style.background = 'rgba(168,85,247,0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+              e.currentTarget.style.background = 'transparent';
+            }}
           >
-            <Building2 className="text-purple-600" size={20} />
+            <Building2 className="text-purple-400" size={20} />
             <div>
-              <p className="font-medium text-gray-900">场地管理</p>
-              <p className="text-sm text-gray-600">添加或管理场地信息</p>
+              <p className="font-medium text-white">场地管理</p>
+              <p className="text-sm text-white/60">添加或管理场地信息</p>
             </div>
           </a>
           <a
             href="/admin/seed"
-            className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg transition-colors"
+            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(59,130,246,0.5)';
+              e.currentTarget.style.background = 'rgba(59,130,246,0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+              e.currentTarget.style.background = 'transparent';
+            }}
           >
-            <TrendingUp className="text-blue-600" size={20} />
+            <TrendingUp className="text-blue-400" size={20} />
             <div>
-              <p className="font-medium text-gray-900">数据初始化</p>
-              <p className="text-sm text-gray-600">初始化示例数据</p>
+              <p className="font-medium text-white">数据初始化</p>
+              <p className="text-sm text-white/60">初始化示例数据</p>
             </div>
           </a>
         </div>

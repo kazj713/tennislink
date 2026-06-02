@@ -109,9 +109,54 @@ export class VenueManager {
     return venue || null;
   }
 
-  async deleteVenue(id: string): Promise<boolean> {
-    const result = await db.delete(venues).where(eq(venues.id, id));
-    return (result.rowCount ?? 0) > 0;
+  async deleteVenue(id: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const venue = await this.getVenueById(id);
+
+      if (!venue) {
+        return {
+          success: false,
+          message: "场地不存在",
+        };
+      }
+
+      const activeBookings = await db
+        .select()
+        .from(venueBookings)
+        .where(
+          and(
+            eq(venueBookings.venueId, id),
+            sql`${venueBookings.status} NOT IN ('cancelled', 'completed')`
+          )
+        );
+
+      if (activeBookings.length > 0) {
+        return {
+          success: false,
+          message: `该场地存在 ${activeBookings.length} 个未完成的预约，请先取消这些预约后再删除场地`,
+        };
+      }
+
+      await db.delete(venues).where(eq(venues.id, id));
+
+      return {
+        success: true,
+        message: "场地已成功删除",
+      };
+    } catch (error) {
+      console.error("Delete venue error:", error);
+      const errorMessage = error instanceof Error ? error.message : "未知错误";
+      if (errorMessage.includes("foreign key constraint")) {
+        return {
+          success: false,
+          message: "删除失败：存在关联数据无法自动清理，请联系管理员",
+        };
+      }
+      return {
+        success: false,
+        message: `删除失败：${errorMessage}`,
+      };
+    }
   }
 
   // ==================== 场地时段相关 ====================
