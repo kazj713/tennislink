@@ -22,7 +22,7 @@ export function getRedisClient(): Redis {
     }
 
     redisClient = new Redis(redisUrl, {
-      retryStrategy: (times) => {
+      retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },

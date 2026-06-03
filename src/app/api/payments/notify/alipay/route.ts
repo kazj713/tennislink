@@ -102,9 +102,9 @@ export async function POST(request: NextRequest) {
  */
 async function updatePaymentStatus(orderId: string, paymentInfo: {
   transactionId: string;
-  status: string;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
   paidAmount: number;
-  paymentMethod: string;
+  paymentMethod: 'wechat' | 'alipay';
   buyerId?: string;
   buyerAccount?: string;
   paidAt: string;

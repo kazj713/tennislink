@@ -34,11 +34,6 @@ const nextConfig: NextConfig = {
   /* Turbopack 配置 */
   turbopack: {},
   
-  /* 禁用类型检查（临时解决方案） */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
   /* 生产环境HTTPS配置 */
   async headers() {
     return [

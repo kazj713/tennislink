@@ -7,6 +7,9 @@ const envSchema = z.object({
   
   // 数据库
   DATABASE_URL: z.string(),
+
+  // Redis
+  REDIS_URL: z.string().optional(),
   
   // JWT
   JWT_SECRET: z.string().min(32, 'JWT密钥至少需要32个字符'),

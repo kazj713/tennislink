@@ -196,7 +196,7 @@ export default function BookingPage() {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 pb-16">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/50 to-gray-50 pt-16 pb-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* 页面标题 */}
         <div className="text-center mb-8">

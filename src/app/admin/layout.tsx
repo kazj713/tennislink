@@ -7,7 +7,6 @@ import {
   Users,
   UserCheck,
   Building2,
-  Database,
   Settings,
   LogOut,
   Menu,
@@ -24,7 +23,6 @@ const navItems = [
   { href: "/admin/coaches", label: "教练管理", icon: UserCheck },
   { href: "/admin/venues", label: "场地管理", icon: Building2 },
   { href: "/admin/profit-sharing", label: "分账管理", icon: DollarSign },
-  { href: "/admin/seed", label: "数据初始化", icon: Database },
   { href: "/admin/settings", label: "系统设置", icon: Settings },
 ];
 
@@ -45,19 +43,34 @@ export default function AdminLayout({
 
   const checkAuth = async () => {
     try {
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          // 验证是否为管理员角色（支持 dev-admin 返回的 role）
+          if (user.role === 'admin') {
+            setUser(user);
+            return;
+          }
+        } catch {
+          // JSON 解析失败
+        }
+      }
+
+      // 尝试 API 验证
       const response = await fetch('/api/auth/me');
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.data.role === 'admin') {
+        if (data.success && data.data?.role === 'admin') {
           setUser(data.data);
-        } else {
-          // 不是管理员，重定向到登录页面
-          router.push('/login');
+          return;
         }
-      } else {
-        // 未登录，重定向到登录页面
-        router.push('/login');
       }
+
+      // 未通过验证，跳转登录页
+      router.push('/login');
     } catch (error) {
       console.error('Auth check failed:', error);
       router.push('/login');

@@ -298,4 +298,4 @@ export class CalendarManager {
 }
 
 // 便捷导出
-export { CalendarEvent };
+export type { CalendarEvent };

@@ -44,7 +44,7 @@ const getDefaultEmailConfig = (): EmailConfig | null => {
 
 // 创建邮件传输器
 const createTransporter = (config: EmailConfig) => {
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: config.host,
     port: config.port,
     secure: config.secure,

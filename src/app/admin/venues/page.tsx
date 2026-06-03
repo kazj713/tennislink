@@ -27,6 +27,10 @@ interface Venue {
   images: string[];
   isActive: boolean;
   createdAt: string;
+  pricing?: {
+    hourlyRate: number;
+    peakHourRate: number;
+  };
 }
 
 export default function AdminVenuesPage() {
@@ -263,6 +267,17 @@ export default function AdminVenuesPage() {
                     </div>
                   </div>
                 </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/40">价格:</span>
+                    {venue.pricing ? (
+                      <span style={{ color: '#fbbf24' }} className="font-semibold">
+                        平时 ¥{venue.pricing.hourlyRate}/小时 | 高峰 ¥{venue.pricing.peakHourRate}/小时
+                      </span>
+                    ) : (
+                      <span className="text-white/50">未设置定价</span>
+                    )}
+                  </div>
 
                 {/* 操作按钮 */}
                 <div className="flex items-center gap-2">

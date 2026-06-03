@@ -118,7 +118,7 @@ class SecurityAudit {
       };
       
       // 日志记录
-      const auditLogger = logger.withContext('SecurityAudit');
+      const auditLogger = logger.withContext({ source: 'SecurityAudit' });
       auditLogger.info(`Audit event: ${eventType}`, {
         userId,
         username,
@@ -135,7 +135,7 @@ class SecurityAudit {
       this.checkForAlerts(auditEntry);
       
     } catch (error) {
-      logger.error('Failed to log audit event', { error });
+      logger.error('Failed to log audit event', error as Error);
     }
   }
   
@@ -165,7 +165,7 @@ class SecurityAudit {
     
     // 严重安全事件告警
     if (entry.severity === 'HIGH' || entry.severity === 'CRITICAL') {
-      logger.error('Critical security event', {
+      logger.error('Critical security event', undefined, {
         eventType: entry.eventType,
         userId: entry.userId,
         username: entry.username,
@@ -214,7 +214,7 @@ class SystemMonitor {
       return;
     }
     
-    const monitorLogger = logger.withContext('SystemMonitor');
+    const monitorLogger = logger.withContext({ source: 'SystemMonitor' });
     monitorLogger.info('Starting system monitoring');
     
     this.intervalId = setInterval(() => {
@@ -229,7 +229,7 @@ class SystemMonitor {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      logger.withContext('SystemMonitor').info('Stopped system monitoring');
+      logger.withContext({ source: 'SystemMonitor' }).info('Stopped system monitoring');
     }
   }
   
@@ -238,7 +238,7 @@ class SystemMonitor {
    */
   private async checkSystemStatus(): Promise<void> {
     try {
-      const monitorLogger = logger.withContext('SystemMonitor');
+      const monitorLogger = logger.withContext({ source: 'SystemMonitor' });
       
       // 检查CPU使用率
       // const cpuUsage = await this.getCpuUsage();
@@ -261,7 +261,7 @@ class SystemMonitor {
       monitorLogger.debug('System status check completed');
       
     } catch (error) {
-      logger.error('System status check failed', { error });
+      logger.error('System status check failed', error as Error);
     }
   }
   
@@ -305,7 +305,7 @@ class PerformanceMonitor {
       return;
     }
     
-    const monitorLogger = logger.withContext('PerformanceMonitor');
+    const monitorLogger = logger.withContext({ source: 'PerformanceMonitor' });
     monitorLogger.info('Starting performance monitoring');
     
     this.intervalId = setInterval(() => {
@@ -320,7 +320,7 @@ class PerformanceMonitor {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      logger.withContext('PerformanceMonitor').info('Stopped performance monitoring');
+      logger.withContext({ source: 'PerformanceMonitor' }).info('Stopped performance monitoring');
     }
   }
   
@@ -346,7 +346,7 @@ class PerformanceMonitor {
    */
   private analyzePerformance(): void {
     try {
-      const monitorLogger = logger.withContext('PerformanceMonitor');
+      const monitorLogger = logger.withContext({ source: 'PerformanceMonitor' });
       
       // 分析API响应时间
       for (const [path, times] of this.apiResponseTimes.entries()) {
@@ -371,7 +371,7 @@ class PerformanceMonitor {
       }
       
     } catch (error) {
-      logger.error('Performance analysis failed', { error });
+      logger.error('Performance analysis failed', error as Error);
     }
   }
   

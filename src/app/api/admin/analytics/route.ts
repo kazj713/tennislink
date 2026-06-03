@@ -1,10 +1,24 @@
 /**
  * 数据统计分析 API
- * 提供平台运营数据统计和分析
+ * 提供平台运营数据统计和分析（所有数据从数据库聚合查询获取）
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWTToken } from '@/lib/auth';
+import {
+  users,
+  coaches,
+  venues,
+  bookings,
+  courses,
+  communityPosts,
+  matchups,
+  courtBookings,
+  venueBookings,
+  paymentOrders,
+} from '@/storage/database/shared/schema';
+import { sql, eq, and, gte, lte, count, sum, desc } from 'drizzle-orm';
+import { getDb } from 'coze-coding-dev-sdk';
 
 /**
  * 验证管理员权限
@@ -18,7 +32,7 @@ async function verifyAdmin(request: NextRequest): Promise<boolean> {
 }
 
 /**
- * 生成过去 N 天的日期数组
+ * 获取过去 N 天的日期数组
  */
 function getLastNDays(n: number): string[] {
   const dates = [];
@@ -31,135 +45,441 @@ function getLastNDays(n: number): string[] {
 }
 
 /**
- * 模拟统计数据
- * 实际项目中应该从数据库查询
+ * 从数据库聚合查询获取所有统计数据
  */
-async function getAnalyticsData() {
-  const last7Days = getLastNDays(7);
-  const last30Days = getLastNDays(30);
+async function getAnalyticsData(type?: string) {
+  const db = await getDb();
+  const today = new Date().toISOString().split('T')[0];
 
-  // 概览数据
-  const overview = {
-    totalUsers: 1256,
-    totalCoaches: 48,
-    totalVenues: 12,
-    totalBookings: 3420,
-    totalRevenue: 856000,
-    todayBookings: 23,
-    todayRevenue: 5800,
-    pendingApprovals: 5,
+  // === 概览数据 ===
+  let overview: Record<string, any> = {
+    totalUsers: 0,
+    totalCoaches: 0,
+    totalVenues: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    todayBookings: 0,
+    todayRevenue: 0,
+    pendingApprovals: 0,
   };
 
-  // 趋势数据（最近7天）
-  const trends = {
-    bookings: last7Days.map((date, index) => ({
-      date,
-      count: Math.floor(Math.random() * 50) + 20,
-      revenue: Math.floor(Math.random() * 10000) + 5000,
-    })),
-    users: last7Days.map((date) => ({
-      date,
-      newUsers: Math.floor(Math.random() * 20) + 5,
-      activeUsers: Math.floor(Math.random() * 200) + 100,
-    })),
+  try {
+    // 总用户数：SELECT COUNT(*) FROM users
+    const [userCount] = await db.select({
+      value: count(),
+    }).from(users);
+    overview.totalUsers = Number(userCount.value) || 0;
+  } catch (e) {
+    console.error('查询总用户数失败:', e);
+  }
+
+  try {
+    // 总教练数（已审核）：SELECT COUNT(*) FROM coaches WHERE status='approved'
+    const [coachCount] = await db.select({
+      value: count(),
+    }).from(coaches).where(eq(coaches.status, 'approved'));
+    overview.totalCoaches = Number(coachCount.value) || 0;
+  } catch (e) {
+    console.error('查询总教练数失败:', e);
+  }
+
+  try {
+    // 总场地数（活跃）：SELECT COUNT(*) FROM venues WHERE is_active=true
+    const [venueCount] = await db.select({
+      value: count(),
+    }).from(venues).where(eq(venues.isActive, true));
+    overview.totalVenues = Number(venueCount.value) || 0;
+  } catch (e) {
+    console.error('查询总场地数失败:', e);
+  }
+
+  try {
+    // 总预订数：SELECT COUNT(*) FROM bookings
+    const [bookingCount] = await db.select({
+      value: count(),
+    }).from(bookings);
+    overview.totalBookings = Number(bookingCount.value) || 0;
+  } catch (e) {
+    console.error('查询总预订数失败:', e);
+  }
+
+  try {
+    // 总收入：COALESCE(SUM(payment_amount), 0) FROM bookings WHERE payment_status='paid'
+    const [revenueResult] = await db.select({
+      value: sql<number>`COALESCE(SUM(${bookings.paymentAmount}), 0)`,
+    }).from(bookings).where(eq(bookings.paymentStatus, 'paid'));
+    overview.totalRevenue = Number(revenueResult.value) || 0;
+  } catch (e) {
+    console.error('查询总收入失败:', e);
+  }
+
+  try {
+    // 今日预订数：COUNT bookings where scheduled_date >= today start
+    const todayStart = new Date(today + 'T00:00:00.000Z');
+    const [todayBookingResult] = await db.select({
+      value: count(),
+    }).from(bookings).where(gte(bookings.scheduledDate, todayStart));
+    overview.todayBookings = Number(todayBookingResult.value) || 0;
+  } catch (e) {
+    console.error('查询今日预订数失败:', e);
+  }
+
+  try {
+    // 今日收入：SUM payment_amount for today's paid bookings
+    const todayStart = new Date(today + 'T00:00:00.000Z');
+    const [todayRevenueResult] = await db.select({
+      value: sql<number>`COALESCE(SUM(${bookings.paymentAmount}), 0)`,
+    })
+      .from(bookings)
+      .where(
+        and(
+          gte(bookings.scheduledDate, todayStart),
+          eq(bookings.paymentStatus, 'paid')
+        )
+      );
+    overview.todayRevenue = Number(todayRevenueResult.value) || 0;
+  } catch (e) {
+    console.error('查询今日收入失败:', e);
+  }
+
+  try {
+    // 待审核教练数：COUNT coaches WHERE status='pending'
+    const [pendingResult] = await db.select({
+      value: count(),
+    }).from(coaches).where(eq(coaches.status, 'pending'));
+    overview.pendingApprovals = Number(pendingResult.value) || 0;
+  } catch (e) {
+    console.error('查询待审核教练数失败:', e);
+  }
+
+  // === 趋势数据（最近7天）===
+  let trends: Record<string, any> = {
+    bookings: [],
+    users: [],
   };
 
-  // 用户统计
-  const userStats = {
-    byLevel: [
-      { level: '1.0-2.0', count: 320, percentage: 25.5 },
-      { level: '2.0-3.0', count: 480, percentage: 38.2 },
-      { level: '3.0-4.0', count: 320, percentage: 25.5 },
-      { level: '4.0-5.0', count: 136, percentage: 10.8 },
-    ],
-    byAge: [
-      { range: '18-25', count: 280, percentage: 22.3 },
-      { range: '26-35', count: 520, percentage: 41.4 },
-      { range: '36-45', count: 320, percentage: 25.5 },
-      { range: '46+', count: 136, percentage: 10.8 },
-    ],
-    growth: last30Days.map((date) => ({
-      date,
-      count: Math.floor(Math.random() * 30) + 10,
-    })),
+  try {
+    // 按日期分组统计每天 booking 数量和收入（最近7天）
+    const last7Days = getLastNDays(7);
+    for (const date of last7Days) {
+      const dayStart = new Date(date + 'T00:00:00.000Z');
+      const dayEnd = new Date(date + 'T23:59:59.999Z');
+
+      try {
+        const [dayStats] = await db.select({
+          count: count(),
+          revenue: sql<number>`COALESCE(SUM(${bookings.paymentAmount}), 0)`,
+        })
+          .from(bookings)
+          .where(
+            and(
+              gte(bookings.scheduledDate, dayStart),
+              lte(bookings.scheduledDate, dayEnd)
+            )
+          );
+
+        trends.bookings.push({
+          date,
+          count: Number(dayStats.count) || 0,
+          revenue: Number(dayStats.revenue) || 0,
+        });
+      } catch {
+        trends.bookings.push({ date, count: 0, revenue: 0 });
+      }
+    }
+  } catch (e) {
+    console.error('查询趋势-预订数据失败:', e);
+    trends.bookings = [];
+  }
+
+  try {
+    // 按日期分组统计每天新注册用户数和活跃用户（最近7天）
+    const last7Days = getLastNDays(7);
+    for (const date of last7Days) {
+      const dayStart = new Date(date + 'T00:00:00.000Z');
+      const dayEnd = new Date(date + 'T23:59:59.999Z');
+
+      try {
+        const [dayUserStats] = await db.select({
+          newUsers: count(),
+        })
+          .from(users)
+          .where(
+            and(
+              gte(users.createdAt, dayStart),
+              lte(users.createdAt, dayEnd)
+            )
+          );
+
+        trends.users.push({
+          date,
+          newUsers: Number(dayUserStats.newUsers) || 0,
+        });
+      } catch {
+        trends.users.push({ date, newUsers: 0 });
+      }
+    }
+  } catch (e) {
+    console.error('查询趋势-用户数据失败:', e);
+    trends.users = [];
+  }
+
+  // === 用户统计 ===
+  let userStats: Record<string, any> = {
+    byLevel: [],
+    growth: [],
   };
 
-  // 预订统计
-  const bookingStats = {
-    byStatus: [
-      { status: 'completed', count: 2560, percentage: 74.9 },
-      { status: 'pending', count: 480, percentage: 14.0 },
-      { status: 'cancelled', count: 280, percentage: 8.2 },
-      { status: 'refunded', count: 100, percentage: 2.9 },
-    ],
-    byHour: Array.from({ length: 14 }, (_, i) => ({
-      hour: `${i + 8}:00`,
-      count: Math.floor(Math.random() * 100) + 20,
-    })),
-    byDayOfWeek: [
-      { day: '周一', count: 380 },
-      { day: '周二', count: 420 },
-      { day: '周三', count: 450 },
-      { day: '周四', count: 480 },
-      { day: '周五', count: 520 },
-      { day: '周六', count: 680 },
-      { day: '周日', count: 490 },
-    ],
+  try {
+    // 按 skill_level 分组统计用户数量及百分比
+    const levelRows = await db.select({
+      level: users.skillLevel,
+      cnt: count(),
+    })
+      .from(users)
+      .groupBy(users.skillLevel)
+      .orderBy(users.skillLevel);
+
+    const totalUserCount = levelRows.reduce((sum, r) => sum + Number(r.cnt), 0) || 1;
+
+    userStats.byLevel = levelRows.map((row) => ({
+      level: `${row.level}.0-${Number(row.level) + 1}.0`,
+      count: Number(row.cnt),
+      percentage: Math.round((Number(row.cnt) / totalUserCount) * 1000) / 10,
+    }));
+  } catch (e) {
+    console.error('查询用户水平分布失败:', e);
+    userStats.byLevel = [];
+  }
+
+  try {
+    // 最近30天每天新注册用户数
+    const last30Days = getLastNDays(30);
+    for (const date of last30Days) {
+      const dayStart = new Date(date + 'T00:00:00.000Z');
+      const dayEnd = new Date(date + 'T23:59:59.999Z');
+
+      try {
+        const [dayReg] = await db.select({
+          cnt: count(),
+        })
+          .from(users)
+          .where(
+            and(
+              gte(users.createdAt, dayStart),
+              lte(users.createdAt, dayEnd)
+            )
+          );
+
+        userStats.growth.push({ date, count: Number(dayReg.cnt) || 0 });
+      } catch {
+        userStats.growth.push({ date, count: 0 });
+      }
+    }
+  } catch (e) {
+    console.error('查询用户增长数据失败:', e);
+    userStats.growth = [];
+  }
+
+  // === 预订统计 ===
+  let bookingStats: Record<string, any> = {
+    byStatus: [],
+    byDayOfWeek: [],
   };
 
-  // 收入统计
-  const revenueStats = {
-    bySource: [
-      { source: '课程预约', amount: 580000, percentage: 67.8 },
-      { source: '场地租赁', amount: 180000, percentage: 21.0 },
-      { source: '商品销售', amount: 56000, percentage: 6.5 },
-      { source: '会员服务', amount: 40000, percentage: 4.7 },
-    ],
-    byMonth: Array.from({ length: 12 }, (_, i) => ({
-      month: `${i + 1}月`,
-      amount: Math.floor(Math.random() * 100000) + 50000,
-    })),
+  try {
+    // 按 status 分组统计预订数量及百分比
+    const statusRows = await db.select({
+      status: bookings.status,
+      cnt: count(),
+    })
+      .from(bookings)
+      .groupBy(bookings.status);
+
+    const totalBookingCount = statusRows.reduce((sum, r) => sum + Number(r.cnt), 0) || 1;
+
+    bookingStats.byStatus = statusRows.map((row) => ({
+      status: row.status,
+      count: Number(row.cnt),
+      percentage: Math.round((Number(row.cnt) / totalBookingCount) * 1000) / 10,
+    }));
+  } catch (e) {
+    console.error('查询预订状态分布失败:', e);
+    bookingStats.byStatus = [];
+  }
+
+  try {
+    // 提取星期几统计预订分布
+    const dowRows = await db.select({
+      dow: sql<number>`EXTRACT(DOW FROM ${bookings.scheduledDate})`,
+      cnt: count(),
+    })
+      .from(bookings)
+      .groupBy(sql`EXTRACT(DOW FROM ${bookings.scheduledDate})`)
+      .orderBy(sql`EXTRACT(DOW FROM ${bookings.scheduledDate})`);
+
+    const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+    // 确保返回完整的一周数据，无数据的日期显示为0
+    const dowMap = new Map(dowRows.map((r) => [Number(r.dow), Number(r.cnt)]));
+
+    bookingStats.byDayOfWeek = [1, 2, 3, 4, 5, 6, 0].map((dow) => ({
+      day: dayNames[dow],
+      count: dowMap.get(dow) || 0,
+    }));
+  } catch (e) {
+    console.error('查询预订星期分布失败:', e);
+    bookingStats.byDayOfWeek = [];
+  }
+
+  // === 收入统计 ===
+  let revenueStats: Record<string, any> = {
+    byMonth: [],
     growth: {
-      currentMonth: 86000,
-      lastMonth: 72000,
-      growthRate: 19.4,
+      currentMonth: 0,
+      lastMonth: 0,
+      growthRate: 0,
     },
   };
 
-  // 教练统计
-  const coachStats = {
-    topCoaches: [
-      { id: '1', name: '李教练', bookings: 156, rating: 4.9, revenue: 46800 },
-      { id: '2', name: '王教练', bookings: 128, rating: 4.8, revenue: 38400 },
-      { id: '3', name: '张教练', bookings: 98, rating: 4.7, revenue: 29400 },
-      { id: '4', name: '刘教练', bookings: 87, rating: 4.6, revenue: 26100 },
-      { id: '5', name: '陈教练', bookings: 76, rating: 4.5, revenue: 22800 },
-    ],
-    byRating: [
-      { rating: '5.0', count: 8 },
-      { rating: '4.5-4.9', count: 18 },
-      { rating: '4.0-4.4', count: 15 },
-      { rating: '3.5-3.9', count: 5 },
-      { rating: '<3.5', count: 2 },
-    ],
+  try {
+    // 近12个月按月分组统计收入
+    const monthRows = await db.select({
+      month: sql<string>`TO_CHAR(${bookings.scheduledDate}, 'YYYY-MM')`,
+      amount: sql<number>`COALESCE(SUM(${bookings.paymentAmount}), 0)`,
+    })
+      .from(bookings)
+      .where(eq(bookings.paymentStatus, 'paid'))
+      .groupBy(sql`TO_CHAR(${bookings.scheduledDate}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${bookings.scheduledDate}, 'YYYY-MM')`);
+
+    revenueStats.byMonth = monthRows.map((row) => ({
+      month: row.month,
+      amount: Number(row.amount) || 0,
+    }));
+
+    // 计算本月 vs 上月收入对比及增长率
+    const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthStr = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+
+    const currentMonthData = monthRows.find((r) => r.month === currentMonthStr);
+    const lastMonthData = monthRows.find((r) => r.month === lastMonthStr);
+
+    const currentMonthRevenue = Number(currentMonthData?.amount) || 0;
+    const lastMonthRevenue = Number(lastMonthData?.amount) || 0;
+
+    revenueStats.growth.currentMonth = currentMonthRevenue;
+    revenueStats.growth.lastMonth = lastMonthRevenue;
+    revenueStats.growth.growthRate =
+      lastMonthRevenue > 0
+        ? Math.round(((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 1000) / 10
+        : 0;
+  } catch (e) {
+    console.error('查询收入统计失败:', e);
+    revenueStats.byMonth = [];
+  }
+
+  // === 教练统计 ===
+  let coachStats: Record<string, any> = {
+    topCoaches: [],
+    byRating: [],
   };
 
-  // 场地统计
-  const venueStats = {
-    topVenues: [
-      { id: '1', name: '朝阳网球中心', bookings: 420, revenue: 42000, utilization: 85 },
-      { id: '2', name: '海淀网球俱乐部', bookings: 380, revenue: 45600, utilization: 78 },
-      { id: '3', name: '丰台体育公园', bookings: 320, revenue: 25600, utilization: 72 },
-      { id: '4', name: '西城网球中心', bookings: 280, revenue: 33600, utilization: 68 },
-    ],
-    utilization: {
-      average: 75.8,
-      byHour: Array.from({ length: 14 }, (_, i) => ({
-        hour: `${i + 8}:00-${i + 9}:00`,
-        rate: Math.floor(Math.random() * 40) + 50,
-      })),
-    },
+  try {
+    // JOIN coaches+users 按 booking 数量/评分排序 TOP 5
+    const topCoachRows = await db
+      .select({
+        id: coaches.id,
+        name: users.name,
+        bookingCnt: count(),
+        rating: coaches.averageRating,
+        revenue: sql<number>`COALESCE(SUM(${bookings.paymentAmount}), 0)`,
+      })
+      .from(coaches)
+      .innerJoin(users, eq(coaches.userId, users.id))
+      .leftJoin(bookings, eq(coaches.id, bookings.coachId))
+      .where(eq(coaches.status, 'approved'))
+      .groupBy(coaches.id, users.name, coaches.averageRating)
+      .orderBy(desc(count()))
+      .limit(5);
+
+    coachStats.topCoaches = topCoachRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      bookings: Number(row.bookingCnt),
+      rating: Number(row.rating) || 0,
+      revenue: Number(row.revenue) || 0,
+    }));
+  } catch (e) {
+    console.error('查询热门教练失败:', e);
+    coachStats.topCoaches = [];
+  }
+
+  try {
+    // 按 average_rating 区间分组统计教练数
+    const allCoaches = await db.select({
+      rating: coaches.averageRating,
+    }).from(coaches).where(eq(coaches.status, 'approved'));
+
+    const buckets: Record<string, number> = {
+      '5.0': 0,
+      '4.5-4.9': 0,
+      '4.0-4.4': 0,
+      '3.5-3.9': 0,
+      '<3.5': 0,
+    };
+
+    for (const c of allCoaches) {
+      const r = Number(c.rating) || 0;
+      if (r >= 5.0) buckets['5.0']++;
+      else if (r >= 4.5) buckets['4.5-4.9']++;
+      else if (r >= 4.0) buckets['4.0-4.4']++;
+      else if (r >= 3.5) buckets['3.5-3.9']++;
+      else buckets['<3.5']++;
+    }
+
+    coachStats.byRating = Object.entries(buckets).map(([rating, count]) => ({
+      rating,
+      count,
+    }));
+  } catch (e) {
+    console.error('查询教练评分分布失败:', e);
+    coachStats.byRating = [];
+  }
+
+  // === 场地统计 ===
+  let venueStats: Record<string, any> = {
+    topVenues: [],
   };
+
+  try {
+    // 按 booking 关联统计 TOP 场地
+    const topVenueRows = await db
+      .select({
+        id: venues.id,
+        name: venues.name,
+        bookingCnt: count(),
+        revenue: sql<number>`COALESCE(SUM(${venueBookings.paymentAmount}), 0)`,
+      })
+      .from(venues)
+      .leftJoin(venueBookings, eq(venues.id, venueBookings.venueId))
+      .where(eq(venues.isActive, true))
+      .groupBy(venues.id, venues.name)
+      .orderBy(desc(count()))
+      .limit(5);
+
+    venueStats.topVenues = topVenueRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      bookings: Number(row.bookingCnt),
+      revenue: Number(row.revenue) || 0,
+    }));
+  } catch (e) {
+    console.error('查询热门场地失败:', e);
+    venueStats.topVenues = [];
+  }
 
   return {
     overview,
@@ -174,7 +494,7 @@ async function getAnalyticsData() {
 
 /**
  * GET /api/admin/analytics
- * 获取统计数据
+ * 获取统计数据（所有数据从数据库聚合查询获取）
  */
 export async function GET(request: NextRequest) {
   try {
@@ -191,7 +511,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'all';
 
-    const data = await getAnalyticsData();
+    const data = await getAnalyticsData(type);
 
     // 根据类型返回数据
     if (type === 'all') {

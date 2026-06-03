@@ -43,14 +43,27 @@ export default function CoachProfilePage() {
   const [editing, setEditing] = useState(false);
   
   // 编辑资料状态
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<{
+    experienceYears: number;
+    certifications: (string | { id: string; type: string; fileName: string; url: string; uploadTime: string; status: string })[];
+    specialties: string[];
+    teachingStyle: string;
+    introduction: string;
+    teachingAreas: string[];
+    hourlyRate: string;
+    availableDays: number[];
+    newCertification: string;
+    newSpecialty: string;
+    newTeachingArea: string;
+  }>({
     experienceYears: 0,
-    certifications: [] as string[],
-    specialties: [] as string[],
+    certifications: [],
+    specialties: [],
     teachingStyle: '',
-    teachingAreas: [] as string[],
+    introduction: '',
+    teachingAreas: [],
     hourlyRate: '',
-    availableDays: [] as number[],
+    availableDays: [],
     newCertification: '',
     newSpecialty: '',
     newTeachingArea: '',
@@ -100,6 +113,7 @@ export default function CoachProfilePage() {
           certifications: coachInfo.certifications || [],
           specialties: coachInfo.specialties || [],
           teachingStyle: coachInfo.teachingStyle || '',
+          introduction: (coachInfo as any).introduction || '',
           teachingAreas: coachInfo.teachingAreas || [],
           hourlyRate: coachInfo.hourlyRate || '',
           availableDays: coachInfo.availableDays || [],
@@ -376,6 +390,7 @@ export default function CoachProfilePage() {
                       certifications: coach.certifications,
                       specialties: coach.specialties,
                       teachingStyle: coach.teachingStyle,
+                      introduction: (coach as any).introduction || '',
                       teachingAreas: coach.teachingAreas,
                       hourlyRate: coach.hourlyRate,
                       availableDays: coach.availableDays,
@@ -546,7 +561,7 @@ export default function CoachProfilePage() {
                   <div className="flex flex-wrap gap-2 mb-4">
                     {editData.certifications.map((cert, index) => (
                       <div key={index} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
-                        <span>{cert}</span>
+                        <span>{typeof cert === 'string' ? cert : cert.fileName}</span>
                         <button
                           onClick={() => handleRemoveCertification(index)}
                           className="text-red-500 hover:text-red-700"

@@ -65,9 +65,8 @@ export const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
  * 获取客户端IP地址
  */
 function getClientIP(request: NextRequest): string {
-  return request.ip || 
-    request.headers.get('x-forwarded-for')?.split(',')[0] || 
-    request.headers.get('x-real-ip') || 
+  return request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
     'unknown';
 }
 

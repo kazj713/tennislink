@@ -10,7 +10,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = await verifyToken(request);
+    const token = await verifyToken();
     if (!token || token.role !== "admin") {
       return NextResponse.json(
         { success: false, error: "无权限", message: "需要管理员权限" },
@@ -74,18 +74,26 @@ export async function PUT(
 
     if (action === "approve") {
       try {
-        const refundAmountYuan = (typeof result.amount === 'string' ? parseFloat(result.amount) : result.amount);
-        const refundResult = await alipayService.refund({
-          outTradeNo: result.orderNo,
-          refundAmount: refundAmountYuan.toFixed(2),
-          refundReason: result.reason || '用户退款',
-        });
+        if (!result.paymentOrderId) {
+          return NextResponse.json({
+            success: false,
+            error: "缺少支付订单ID",
+            message: "无法处理退款：关联的支付订单不存在",
+          }, { status: 400 });
+        }
 
-        if (refundResult.success && refundResult.data?.tradeNo) {
-          await refundManager.markAsRefunded(id, refundResult.data.tradeNo);
+        const refundAmountYuan = (typeof result.amount === 'string' ? parseFloat(result.amount) : result.amount);
+        const refundResult = await alipayService.refundPayment(
+          result.paymentOrderId,
+          refundAmountYuan * 100,
+          result.reason || '用户退款'
+        );
+
+        if (refundResult.success && refundResult.data?.transactionId) {
+          await refundManager.markAsRefunded(id, refundResult.data.transactionId);
           return NextResponse.json({
             success: true,
-            data: { ...result, refundTransactionId: refundResult.data.tradeNo },
+            data: { ...result, refundTransactionId: refundResult.data.transactionId },
             message: "退款申请已通过，退款已处理",
           });
         } else {

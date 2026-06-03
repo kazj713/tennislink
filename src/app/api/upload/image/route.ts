@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // 上传到对象存储
-    const { key, url } = await uploadFile(buffer, file.name, file.type, folder);
+    const { key, url } = await uploadFile(buffer, file.name, { contentType: file.type, folder });
 
     return NextResponse.json({
       success: true,

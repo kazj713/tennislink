@@ -6,7 +6,6 @@ import {
   UserCheck,
   Building2,
   Calendar,
-  TrendingUp,
   DollarSign,
 } from "lucide-react";
 
@@ -175,25 +174,6 @@ export default function AdminDashboard() {
             <div>
               <p className="font-medium text-white">场地管理</p>
               <p className="text-sm text-white/60">添加或管理场地信息</p>
-            </div>
-          </a>
-          <a
-            href="/admin/seed"
-            className="flex items-center gap-3 p-4 rounded-lg transition-colors"
-            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(59,130,246,0.5)';
-              e.currentTarget.style.background = 'rgba(59,130,246,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.background = 'transparent';
-            }}
-          >
-            <TrendingUp className="text-blue-400" size={20} />
-            <div>
-              <p className="font-medium text-white">数据初始化</p>
-              <p className="text-sm text-white/60">初始化示例数据</p>
             </div>
           </a>
         </div>

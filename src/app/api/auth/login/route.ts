@@ -8,53 +8,13 @@ import { verifyPassword, generateJWTToken, validateEmail, validatePassword } fro
 import { rateLimitMiddleware } from '@/lib/rateLimit';
 import { getUserByEmail } from '@/storage/database/userManager';
 
-// 本地开发环境的模拟用户数据
-const MOCK_USERS = [
-  {
-    id: 'admin-001',
-    email: 'admin@tennislink.com',
-    password: 'admin123456',
-    name: '系统管理员',
-    role: 'admin',
-    phone: '13800000000',
-    avatar: null,
-    username: 'admin',
-    wechatOpenid: null
-  },
-  {
-    id: 'coach-001',
-    email: 'coach@tennislink.com',
-    password: 'coach123456',
-    name: '测试教练',
-    role: 'coach',
-    phone: '13800000001',
-    avatar: null,
-    username: 'coach',
-    wechatOpenid: null
-  },
-  {
-    id: 'student-001',
-    email: 'student@tennislink.com',
-    password: 'student123456',
-    name: '测试学员',
-    role: 'student',
-    phone: '13800000002',
-    avatar: null,
-    username: 'student',
-    wechatOpenid: null
-  }
-];
 
-// 检查是否是本地开发环境
-const isDevelopment = process.env.NODE_ENV === 'development';
 
 export async function POST(request: NextRequest) {
-  // 生产环境应用速率限制，开发环境跳过
-  if (!isDevelopment) {
-    const rateLimitResponse = rateLimitMiddleware(request);
-    if (rateLimitResponse) {
-      return rateLimitResponse;
-    }
+  // 应用速率限制
+  const rateLimitResponse = rateLimitMiddleware(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -79,40 +39,30 @@ export async function POST(request: NextRequest) {
 
     let user;
 
-    // 本地开发环境使用模拟数据
-    if (isDevelopment) {
-      const mockUser = MOCK_USERS.find(u => u.email === email);
-      if (mockUser && mockUser.password === password) {
-        user = mockUser;
-      }
-    } else {
-      // 生产环境使用数据库
-      user = await getUserByEmail(email);
-    }
+    // 统一从数据库查询用户
+    user = await getUserByEmail(email);
 
     if (!user) {
-      // 为了安全，即使用户不存在也返回相同的错误信息
       return NextResponse.json(
         { error: '邮箱或密码错误' },
         { status: 401 }
       );
     }
 
-    // 生产环境验证密码
-    if (!isDevelopment) {
-      if (!user.password) {
-        return NextResponse.json(
-          { error: '邮箱或密码错误' },
-          { status: 401 }
-        );
-      }
-      const isPasswordValid = await verifyPassword(password, user.password);
-      if (!isPasswordValid) {
-        return NextResponse.json(
-          { error: '邮箱或密码错误' },
-          { status: 401 }
-        );
-      }
+    // 验证密码
+    if (!user.password) {
+      return NextResponse.json(
+        { error: '邮箱或密码错误' },
+        { status: 401 }
+      );
+    }
+
+    const isPasswordValid = await verifyPassword(password, user.password);
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: '邮箱或密码错误' },
+        { status: 401 }
+      );
     }
 
     // 生成JWT Token

@@ -1,7 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+interface Coach {
+  id: string;
+  name: string;
+  rating: number;
+  years?: number;
+  students?: number;
+  price: number;
+  tags?: string[];
+  avatarColor?: string;
+  description?: string;
+  avatar?: string | null;
+}
 
 export default function CoachesPage() {
   const [filters, setFilters] = useState({
@@ -9,78 +22,40 @@ export default function CoachesPage() {
     location: '',
     priceRange: '',
   });
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const coaches = [
-    {
-      id: 1,
-      name: '张教练',
-      rating: 4.9,
-      years: 10,
-      students: 500,
-      price: 300,
-      tags: ['ATP认证', '发球专家', '青少年'],
-      avatarColor: 'from-emerald-400 to-emerald-600',
-      description: '10年教学经验，前省队主力，擅长发球和底线技术',
-    },
-    {
-      id: 2,
-      name: '李教练',
-      rating: 4.8,
-      years: 8,
-      students: 350,
-      price: 250,
-      tags: ['省队', '底线', '双打'],
-      avatarColor: 'from-emerald-400 to-emerald-600',
-      description: '8年教学经验，前省队主力，专注底线技术和双打战术',
-    },
-    {
-      id: 3,
-      name: '王教练',
-      rating: 4.7,
-      years: 5,
-      students: 200,
-      price: 200,
-      tags: ['青少年', '入门', '趣味'],
-      avatarColor: 'from-teal-400 to-teal-600',
-      description: '5年教学经验，专注于青少年网球启蒙，教学风格活泼',
-    },
-    {
-      id: 4,
-      name: '刘教练',
-      rating: 4.9,
-      years: 12,
-      students: 600,
-      price: 400,
-      tags: ['国际认证', '战术', '比赛'],
-      avatarColor: 'from-rose-400 to-rose-600',
-      description: '12年教学经验，ITF认证教练，擅长比赛战术分析',
-    },
-    {
-      id: 5,
-      name: '陈教练',
-      rating: 4.6,
-      years: 6,
-      students: 280,
-      price: 220,
-      tags: ['网前', '截击', '进阶'],
-      avatarColor: 'from-amber-400 to-amber-600',
-      description: '6年教学经验，专注网前技术和截击技巧，帮助学员提升进攻能力',
-    },
-    {
-      id: 6,
-      name: '赵教练',
-      rating: 4.8,
-      years: 7,
-      students: 320,
-      price: 280,
-      tags: ['体能', '康复', '全面'],
-      avatarColor: 'from-cyan-400 to-cyan-600',
-      description: '7年教学经验，结合体能训练和康复指导，全面提升学员身体素质',
-    },
-  ];
+  // 从API获取教练列表
+  useEffect(() => {
+    async function fetchCoaches() {
+      try {
+        const response = await fetch('/api/coaches');
+        if (!response.ok) throw new Error('获取教练列表失败');
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          const formattedCoaches = data.data.map((coach: any) => ({
+            id: coach.id,
+            name: coach.name || coach.user?.name || '未知教练',
+            rating: coach.rating || coach.averageRating || 4.5,
+            years: coach.experienceYears || coach.experience_years,
+            students: coach.totalLessons || coach.total_lessons,
+            price: coach.hourlyRate || coach.hourly_rate || 200,
+            tags: coach.specialties || coach.certifications || [],
+            description: coach.description || `${coach.years || coach.experienceYears || 0}年教学经验`,
+          }));
+          setCoaches(formattedCoaches);
+        }
+      } catch (err) {
+        console.error('获取教练列表失败:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCoaches();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/50 to-gray-50 pt-16">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -140,59 +115,85 @@ export default function CoachesPage() {
 
       {/* 教练列表 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {coaches.map((coach) => (
-            <Link
-              key={coach.id}
-              href={`/coaches/${coach.id}`}
-              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1"
-            >
-              {/* 头像 */}
-              <div className={`aspect-[4/3] bg-gradient-to-br ${coach.avatarColor} flex items-center justify-center`}>
-                <span className="text-8xl font-bold text-white/20">{coach.name[0]}</span>
-              </div>
-
-              {/* 信息 */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-bold text-gray-900">{coach.name}</h3>
-                  <div className="flex items-center gap-1">
-                    <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span className="text-gray-700 font-semibold">{coach.rating}</span>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 mb-4 text-sm line-clamp-2">{coach.description}</p>
-
-                {/* 标签 */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {coach.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* 底部信息 */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>{coach.years}年经验</span>
-                    <span>{coach.students}+学员</span>
-                  </div>
-                  <span className="text-2xl font-bold text-emerald-600">
-                    ¥{coach.price}
-                    <span className="text-sm font-normal text-gray-500">/课时</span>
-                  </span>
-                </div>
-              </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mb-4"></div>
+            <p className="text-gray-600">加载教练列表...</p>
+          </div>
+        ) : coaches.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">暂无教练信息</h3>
+            <p className="text-gray-600 mb-6">目前还没有可用的教练，请稍后再来查看</p>
+            <Link href="/find-coach" className="inline-block px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
+              填写需求找教练
             </Link>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {coaches.map((coach) => (
+              <Link
+                key={coach.id}
+                href={`/coaches/${coach.id}`}
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1"
+              >
+                {/* 头像 */}
+                <div className="aspect-[4/3] bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                  {coach.avatar ? (
+                    <img src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-8xl font-bold text-white/20">{coach.name[0]}</span>
+                  )}
+                </div>
+
+                {/* 信息 */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-bold text-gray-900">{coach.name}</h3>
+                    <div className="flex items-center gap-1">
+                      <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span className="text-gray-700 font-semibold">{coach.rating.toFixed(1)}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-600 mb-4 text-sm line-clamp-2">{coach.description}</p>
+
+                  {/* 标签 */}
+                  {coach.tags && coach.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {coach.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 底部信息 */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      {coach.years && <span>{coach.years}年经验</span>}
+                      {coach.students && <span>{coach.students}+学员</span>}
+                    </div>
+                    <span className="text-2xl font-bold text-emerald-600">
+                      ¥{coach.price}
+                      <span className="text-sm font-normal text-gray-500">/课时</span>
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

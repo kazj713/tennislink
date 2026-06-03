@@ -992,6 +992,7 @@ export const updateUserSchema = createCoercedInsertSchema(users)
   .pick({
     email: true,
     phone: true,
+    password: true,
     name: true,
     avatar: true,
     gender: true,

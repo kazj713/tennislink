@@ -358,6 +358,9 @@ export default function RegisterPage() {
             </label>
           </div>
         </div>
+          {!agreeTerms && (
+            <p className="mb-2 text-sm text-red-500">请先阅读并同意用户协议和隐私政策</p>
+          )}
 
         {/* 注册按钮 */}
         <button

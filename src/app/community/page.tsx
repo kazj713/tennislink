@@ -7,8 +7,6 @@ export default function CommunityPage() {
   const [showPostModal, setShowPostModal] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [challenges, setChallenges] = useState<any[]>([]);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 模拟数据加载
@@ -81,13 +79,6 @@ export default function CommunityPage() {
         },
       ]);
       
-      setTopics(['#发球技巧', '#新手入门', '#双打战术', '#体能训练', '#装备推荐']);
-      
-      setActiveUsers([
-        { name: '网球达人', level: '高级', color: 'from-emerald-400 to-emerald-600' },
-        { name: '教练张', level: '教练', color: 'from-emerald-400 to-emerald-600' },
-        { name: '新手小王', level: '初级', color: 'from-purple-400 to-purple-600' },
-      ]);
       
       setLoading(false);
     }, 500);
@@ -95,7 +86,7 @@ export default function CommunityPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-16 pb-16 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-emerald-50/50 to-gray-50 pt-16 pb-16 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mb-4"></div>
           <p className="text-gray-600">加载中...</p>
@@ -105,7 +96,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 pb-16">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/50 to-gray-50 pt-16 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
@@ -216,9 +207,9 @@ export default function CommunityPage() {
         ) : null}
 
         {/* 内容区域 */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div>
           {/* 主内容区 */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="space-y-6">
             {posts.length > 0 ? (
               posts.map((post) => (
                 <div key={post.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
@@ -241,7 +232,7 @@ export default function CommunityPage() {
                   {/* 图片 */}
                   {post.images.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                      {post.images.map((color, index) => (
+                      {post.images.map((color: string, index: number) => (
                         <div
                           key={index}
                           className={`aspect-video bg-gradient-to-br ${color} rounded-lg overflow-hidden`}
@@ -252,7 +243,7 @@ export default function CommunityPage() {
 
                   {/* 标签 */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {post.tags.map((tag) => (
+                    {post.tags.map((tag: string) => (
                       <span
                         key={tag}
                         className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
@@ -306,45 +297,6 @@ export default function CommunityPage() {
 
           {/* 侧边栏 */}
           <div className="space-y-6">
-            {/* 热门话题 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">热门话题</h3>
-              <div className="space-y-3">
-                {topics.map((topic, index) => (
-                  <div
-                    key={topic}
-                    className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                  >
-                    <span className="text-emerald-600 font-semibold">{topic}</span>
-                    <span className="text-sm text-gray-500">{(100 - index * 15)} 讨论</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 活跃用户 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">活跃球友</h3>
-              <div className="space-y-3">
-                {activeUsers.map((user) => (
-                  <div
-                    key={user.name}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                  >
-                    <div
-                      className={`w-10 h-10 bg-gradient-to-br ${user.color} rounded-full flex items-center justify-center`}
-                    >
-                      <span className="text-white font-bold">{user.name[0]}</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900">{user.name}</div>
-                      <div className="text-sm text-gray-500">{user.level}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* 社区指南 */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-gray-900 mb-4">社区指南</h3>

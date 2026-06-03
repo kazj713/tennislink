@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const xmlData = body;
 
     // 解析XML数据
-    const result = xml2js(xmlData, { compact: true });
+    const result = xml2js(xmlData, { compact: true }) as any;
     const paymentData = result.xml;
 
     // 验证签名

@@ -148,7 +148,7 @@ async function createWechatPayment(request: PaymentRequest, config: PaymentConfi
 
   // 生成签名
   const sign = generateWechatSign(params, config.mchKey);
-  params.sign = sign;
+  (params as any).sign = sign;
 
   // 调用微信支付API
   // 这里需要实际的API调用代码，建议使用官方SDK
@@ -180,9 +180,9 @@ async function createWechatPayment(request: PaymentRequest, config: PaymentConfi
         'Content-Type': 'application/xml',
         'Content-Length': Buffer.byteLength(xmlData)
       }
-    }, (res) => {
+    }, (res: any) => {
       let responseData = '';
-      res.on('data', (chunk) => {
+      res.on('data', (chunk: any) => {
         responseData += chunk;
       });
       res.on('end', () => {
@@ -217,7 +217,7 @@ async function createWechatPayment(request: PaymentRequest, config: PaymentConfi
       });
     });
 
-    req.on('error', (err) => {
+    req.on('error', (err: Error) => {
       console.error('微信支付请求失败:', err);
       resolve({
         success: false,

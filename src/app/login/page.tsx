@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -11,6 +11,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
+  // 微信扫码登录
+  const [showQrLogin, setShowQrLogin] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  const [qrSessionId, setQrSessionId] = useState<string | null>(null);
+  const [qrStatus, setQrStatus] = useState<'idle' | 'loading' | 'waiting' | 'scanned' | 'confirmed' | 'expired' | 'error'>('idle');
+  const qrPollingRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleWechatLogin = async () => {
     setError('');
@@ -40,10 +48,100 @@ export default function LoginPage() {
     }
   };
 
+  // 获取二维码
+  const handleWechatQRLogin = async () => {
+    setShowQrLogin(true);
+    setQrStatus('loading');
+
+    try {
+      const res = await fetch('/api/auth/wechat-qrcode', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success) {
+        setQrCodeData(data.data.qrcode);
+        setQrSessionId(data.data.sessionId);
+        setQrStatus('waiting');
+        startPolling(data.data.sessionId);
+      } else {
+        setQrStatus('error');
+        setError('获取二维码失败');
+      }
+    } catch (err) {
+      setQrStatus('error');
+      setError('网络错误，请重试');
+    }
+  };
+
+  // 轮询扫码状态
+  const startPolling = (sessionId: string) => {
+    if (qrPollingRef.current) clearInterval(qrPollingRef.current);
+
+    qrPollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/auth/wechat-callback?sessionId=${sessionId}`);
+        const data = await res.json();
+
+        if (data.success && data.data.status !== 'waiting') {
+          setQrStatus(data.data.status);
+
+          if (data.data.status === 'confirmed' && data.data.user && data.data.token) {
+            // 登录成功
+            clearInterval(qrPollingRef.current!);
+
+            // 存储token和用户信息
+            localStorage.setItem('token', data.data.token);
+            localStorage.setItem('user', JSON.stringify(data.data.user));
+            document.cookie = `token=${data.data.token}; path=/; max-age=604800; SameSite=Lax`;
+
+            // 根据角色跳转
+            if (data.data.user.role === 'admin') {
+              router.push('/admin');
+            } else if (data.data.user.role === 'coach') {
+              router.push('/coach-profile');
+            } else {
+              router.push('/');
+            }
+          } else if (data.data.status === 'scanned') {
+            // 已扫描，继续等待确认
+          } else if (data.data.status === 'expired') {
+            clearInterval(qrPollingRef.current!);
+            setQrStatus('expired');
+          }
+        }
+      } catch {
+        // 忽略轮询错误
+      }
+    }, 2000); // 每2秒轮询一次
+
+    // 5分钟后停止轮询
+    setTimeout(() => {
+      if (qrPollingRef.current) {
+        clearInterval(qrPollingRef.current);
+        setQrStatus('expired');
+      }
+    }, 300000);
+  };
+
+  // 切换回账号密码登录
+  const handleBackToPasswordLogin = () => {
+    setShowQrLogin(false);
+    setQrCodeData(null);
+    setQrSessionId(null);
+    setQrStatus('idle');
+    if (qrPollingRef.current) {
+      clearInterval(qrPollingRef.current);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!agreeTerms) {
+      setError('请先阅读并同意用户协议和隐私政策');
+      return;
+    }
 
     // 验证输入
     if (!identifier.trim() || !password.trim()) {
@@ -64,26 +162,22 @@ export default function LoginPage() {
       if (data.success) {
         // 保存token到localStorage
         localStorage.setItem('token', data.token);
-        
+
         // 保存token到cookie（用于服务端验证）
         document.cookie = `token=${data.token}; path=/; max-age=86400`;
-        
+
         // 保存用户信息到localStorage
         localStorage.setItem('user', JSON.stringify(data.user));
-        
+
         // 根据用户角色跳转到不同页面
         const userRole = data.user.role;
         if (userRole === 'coach') {
-          // 教练跳转到教练端页面
           router.push('/coach-profile');
         } else if (userRole === 'student') {
-          // 学员跳转到学员端页面
           router.push('/profile');
         } else if (userRole === 'admin') {
-          // 管理员跳转到后台管理
           router.push('/admin');
         } else {
-          // 默认跳转到首页
           router.push('/');
         }
         router.refresh();
@@ -143,6 +237,36 @@ export default function LoginPage() {
           </button>
         </div>
 
+        {/* 登录方式 Tab 切换 */}
+        <div className="flex mb-6 border-b border-gray-200">
+          <button
+            onClick={() => handleBackToPasswordLogin()}
+            className={`flex-1 py-3 text-center font-semibold transition-colors relative ${
+              !showQrLogin
+                ? 'text-emerald-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            账号密码登录
+            {!showQrLogin && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></span>
+            )}
+          </button>
+          <button
+            onClick={() => handleWechatQRLogin()}
+            className={`flex-1 py-3 text-center font-semibold transition-colors relative ${
+              showQrLogin
+                ? 'text-emerald-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            微信扫码登录
+            {showQrLogin && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></span>
+            )}
+          </button>
+        </div>
+
         {/* 错误提示 */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
@@ -150,69 +274,151 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* 表单 */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 账号（手机号/邮箱） */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              账号（手机号 / 邮箱）
-            </label>
-            <input
-              type="text"
-              placeholder="请输入手机号或邮箱"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
-
-          {/* 密码 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              密码
-            </label>
-            <input
-              type="password"
-              placeholder="请输入密码"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
-
-          {/* 登录按钮 */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? '登录中...' : '登录'}
-          </button>
-        </form>
-
-        {/* 微信登录 */}
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+        {/* 账号密码登录内容 */}
+        {!showQrLogin && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 账号（手机号/邮箱） */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                账号（手机号 / 邮箱）
+              </label>
+              <input
+                type="text"
+                placeholder="请输入手机号或邮箱"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+              />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">或使用微信登录</span>
-            </div>
-          </div>
 
-          <button
-            onClick={() => handleWechatLogin()}
-            className="w-full mt-4 py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
-              <path d="M18.761 12.427c.075 1.318-.562 2.535-1.646 3.198-.43.24-.856.394-1.269.474-.793.158-1.608.08-2.321-.253-.396-.183-.768-.394-1.107-.634l-1.322-.991-1.322.991c-.84.63-1.887.985-2.976.985-1.09 0-2.136-.355-2.976-.985-.339.24-.711.451-1.107.634-.713.333-1.528.411-2.321.253-.413-.08-.839-.234-1.269-.474C1.798 14.962 1.162 13.745 1.236 12.427c.075-1.319.711-2.536 1.797-3.203.43-.24.856-.395 1.269-.475.792-.158 1.607-.08 2.321.253.396.183.768.395 1.107.636l1.322.99 1.322-.99c.84-.631 1.887-.986 2.976-.986 1.09 0 2.136.355 2.976.986.339-.241.711-.453 1.107-.636.713-.333 1.528-.411 2.321-.253.413.08.839.235 1.269.475 1.086.667 1.722 1.884 1.797 3.203zm-16.534-.162c-.066-1.148.496-2.196 1.395-2.753.322-.197.653-.356.988-.474.737-.25 1.51-.25 2.247 0 .335.118.666.277.988.474.899.557 1.461 1.605 1.395 2.753-.066 1.148-.728 2.197-1.719 2.745-.411.237-.85.386-1.288.46-.438.074-.896.074-1.334 0-.438-.074-.877-.223-1.288-.46-.991-.548-1.653-1.597-1.719-2.745z"/>
-            </svg>
-            微信一键登录
-          </button>
-        </div>
+            {/* 密码 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                密码
+              </label>
+              <input
+                type="password"
+                placeholder="请输入密码"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+              />
+            </div>
+
+            {/* 用户协议 */}
+            <div className="flex items-start gap-2 mb-6">
+              <input
+                type="checkbox"
+                id="agreeTerms"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="mt-1 w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+              />
+              <label htmlFor="agreeTerms" className="text-sm text-gray-600">
+                我已阅读并同意{' '}
+                <a href="/terms" className="text-emerald-600 hover:underline">《用户服务协议》</a>
+                {' '}和{' '}
+                <a href="/privacy" className="text-emerald-600 hover:underline">《隐私政策》</a>
+              </label>
+            </div>
+            {!agreeTerms && (
+              <p className="mb-4 text-sm text-red-500">请先阅读并同意用户协议和隐私政策</p>
+            )}
+
+            {/* 登录按钮 */}
+            <button
+              type="submit"
+              disabled={loading || !agreeTerms}
+              className="w-full py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '登录中...' : '登录'}
+            </button>
+
+            {/* 忘记密码链接 */}
+            <div className="text-center">
+              <Link href="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700">
+                忘记密码？
+              </Link>
+            </div>
+          </form>
+        )}
+
+        {/* 微信扫码登录内容 */}
+        {showQrLogin && (
+          <div className="flex flex-col items-center py-4">
+            {/* 二维码展示区 */}
+            <div className="relative w-[280px] h-[280px] border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50">
+              {qrStatus === 'loading' && (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-gray-500 text-sm">正在生成二维码...</p>
+                </div>
+              )}
+
+              {(qrStatus === 'waiting' || qrStatus === 'scanned') && qrCodeData && (
+                <>
+                  <img src={qrCodeData} alt="微信扫码登录" className="w-[280px] h-[280px]" />
+                  {qrStatus === 'scanned' && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                      <p className="text-emerald-600 font-semibold">已扫描，请在手机上确认</p>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {qrStatus === 'confirmed' && (
+                <div className="flex flex-col items-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  <p className="text-emerald-600 font-semibold">登录成功，正在跳转...</p>
+                </div>
+              )}
+
+              {qrStatus === 'expired' && (
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-gray-500 text-sm">二维码已过期</p>
+                  <button
+                    onClick={() => handleWechatQRLogin()}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm"
+                  >
+                    刷新二维码
+                  </button>
+                </div>
+              )}
+
+              {qrStatus === 'error' && (
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-red-500 text-sm">获取失败</p>
+                  <button
+                    onClick={() => handleWechatQRLogin()}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm"
+                  >
+                    重试
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 状态提示文字 */}
+            <p className="mt-4 text-sm text-gray-500">
+              {qrStatus === 'waiting' && '请使用微信扫描二维码'}
+              {qrStatus === 'scanned' && '已扫描，请在手机上确认'}
+              {qrStatus === 'confirmed' && '登录成功，正在跳转...'}
+            </p>
+
+            {/* 返回账号密码登录 */}
+            <button
+              onClick={() => handleBackToPasswordLogin()}
+              className="mt-6 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              返回账号密码登录
+            </button>
+          </div>
+        )}
 
         {/* 注册链接 */}
         <p className="mt-6 text-center text-gray-600">

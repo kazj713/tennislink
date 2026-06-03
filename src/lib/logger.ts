@@ -184,55 +184,6 @@ class Logger {
     (contextualLogger as any).defaultContext = context;
     return contextualLogger as Logger;
   }
-
-  /**
-   * 带默认上下文的调试日志
-   */
-  debug(message: string, context?: Record<string, any>): void {
-    if (!this.shouldLog('debug')) return;
-
-    const mergedContext = { ...(this as any).defaultContext, ...context };
-    const entry = this.createEntry('debug', message, mergedContext);
-    console.debug(this.formatMessage(entry));
-  }
-
-  /**
-   * 带默认上下文的信息日志
-   */
-  info(message: string, context?: Record<string, any>): void {
-    if (!this.shouldLog('info')) return;
-
-    const mergedContext = { ...(this as any).defaultContext, ...context };
-    const entry = this.createEntry('info', message, mergedContext);
-    console.info(this.formatMessage(entry));
-  }
-
-  /**
-   * 带默认上下文的警告日志
-   */
-  warn(message: string, context?: Record<string, any>): void {
-    if (!this.shouldLog('warn')) return;
-
-    const mergedContext = { ...(this as any).defaultContext, ...context };
-    const entry = this.createEntry('warn', message, mergedContext);
-    console.warn(this.formatMessage(entry));
-  }
-
-  /**
-   * 带默认上下文的错误日志
-   */
-  error(message: string, error?: Error, context?: Record<string, any>): void {
-    if (!this.shouldLog('error')) return;
-
-    const mergedContext = { ...(this as any).defaultContext, ...context };
-    const entry = this.createEntry('error', message, mergedContext, error);
-    console.error(this.formatMessage(entry));
-
-    // 生产环境下发送错误到监控服务
-    if (!(this as any).isDevelopment && error) {
-      this.sendToErrorTracking(error, mergedContext);
-    }
-  }
 }
 
 // 导出单例实例

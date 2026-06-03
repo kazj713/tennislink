@@ -27,3 +27,7 @@ pool.on('error', (err) => {
 const db = drizzle(pool);
 
 export { db, pool };
+
+export async function getDb() {
+  return db;
+}

@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { refundManager } from "@/storage/database/refundManager";
 import { verifyToken } from "@/lib/auth";
 import { getOrderById } from "@/storage/database/paymentManager";
-import { courtBookingManager } from "@/storage/database/courtBookingManager";
+import { venueManager } from "@/storage/database/venueManager";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = await verifyToken(request);
+    const token = await verifyToken();
     if (!token) {
       return NextResponse.json(
         { success: false, error: "未登录", message: "请先登录" },
@@ -85,13 +85,15 @@ export async function POST(request: NextRequest) {
     let bookingStartTime = "";
     let bookingId = "";
 
-    if (order.metadata?.courtBookingId) {
-      const booking = await courtBookingManager.getBookingById(
-        order.metadata.courtBookingId
+    const metadata = order.metadata as { courtBookingId?: string } | null | undefined;
+
+    if (metadata?.courtBookingId) {
+      const booking = await venueManager.getVenueBookingById(
+        metadata.courtBookingId
       );
       if (booking) {
-        bookingDate = booking.bookingDate as string;
-        bookingStartTime = booking.startTime as string;
+        bookingDate = booking.bookingDate instanceof Date ? booking.bookingDate.toISOString().split('T')[0] : String(booking.bookingDate);
+        bookingStartTime = booking.bookingDate instanceof Date ? booking.bookingDate.toISOString() : String(booking.bookingDate);
         bookingId = booking.id;
       }
     }
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let initialStatus = "pending_auto";
+    let initialStatus: "pending_auto" | "pending_manual" = "pending_auto";
     if (
       reasonType === "weather" &&
       refundCheck.isWeatherException
@@ -168,7 +170,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const token = await verifyToken(request);
+    const token = await verifyToken();
     if (!token) {
       return NextResponse.json(
         { success: false, error: "未登录", message: "请先登录" },

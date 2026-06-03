@@ -187,7 +187,7 @@ if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
  */
 export function encryptData(data: string): string {
   const algorithm = 'aes-256-gcm';
-  const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
+  const key = crypto.scryptSync(ENCRYPTION_KEY!, 'salt', 32);
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipher(algorithm, key, iv);
   
@@ -204,7 +204,7 @@ export function encryptData(data: string): string {
  */
 export function decryptData(encryptedData: string): string {
   const algorithm = 'aes-256-gcm';
-  const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
+  const key = crypto.scryptSync(ENCRYPTION_KEY!, 'salt', 32);
   
   const parts = encryptedData.split(':');
   const iv = Buffer.from(parts[0], 'hex');

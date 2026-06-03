@@ -54,34 +54,6 @@ export default function SystemSettings() {
         }
       ]
     },
-    payment: {
-      id: 'payment',
-      title: '支付设置',
-      icon: <Settings className="w-5 h-5" />,
-      settings: [
-        {
-          id: 'wechatPayEnabled',
-          label: '启用微信支付',
-          type: 'boolean',
-          value: true,
-          description: '是否启用微信支付功能'
-        },
-        {
-          id: 'alipayEnabled',
-          label: '启用支付宝',
-          type: 'boolean',
-          value: true,
-          description: '是否启用支付宝功能'
-        },
-        {
-          id: 'testMode',
-          label: '测试模式',
-          type: 'boolean',
-          value: true,
-          description: '开启后使用模拟支付，不调用真实API'
-        }
-      ]
-    },
     notification: {
       id: 'notification',
       title: '通知设置',

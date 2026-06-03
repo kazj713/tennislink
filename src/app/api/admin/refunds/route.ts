@@ -4,7 +4,7 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = await verifyToken(request);
+    const token = await verifyToken();
     if (!token || token.role !== "admin") {
       return NextResponse.json(
         { success: false, error: "无权限", message: "需要管理员权限" },

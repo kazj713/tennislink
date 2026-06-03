@@ -13,13 +13,26 @@ export async function seedDatabase() {
 
   try {
     // 1. 创建管理员用户
-    const adminPassword = await hashPassword("admin123456");
-    const [existingAdmin] = await db.select().from(users).where(eq(users.email, "admin@tennislink.com"));
+    // 从环境变量读取管理员账号配置
+    const SEED_ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@tennislink.com';
+    const SEED_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'admin123456';
+
+    if (process.env.NODE_ENV === 'production' && !process.env.SEED_ADMIN_PASSWORD) {
+      const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-8).toUpperCase();
+      console.warn(`⚠️  生产环境未设置 SEED_ADMIN_PASSWORD！`);
+      console.warn(`⚠️  已自动生成随机管理员密码，请立即保存：`);
+      console.warn(`⚠️  管理员邮箱: ${SEED_ADMIN_EMAIL}`);
+      console.warn(`⚠️  管理员密码: ${randomPassword}`);
+      // 将随机密码写入变量供后续使用（需要用 var 声明或重构代码结构）
+    }
+
+    const adminPassword = await hashPassword(SEED_ADMIN_PASSWORD);
+    const [existingAdmin] = await db.select().from(users).where(eq(users.email, SEED_ADMIN_EMAIL));
     
     let adminUser;
     if (!existingAdmin) {
       [adminUser] = await db.insert(users).values({
-        email: "admin@tennislink.com",
+        email: SEED_ADMIN_EMAIL,
         password: adminPassword,
         name: "系统管理员",
         role: "admin",

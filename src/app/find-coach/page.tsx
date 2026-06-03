@@ -115,11 +115,11 @@ export default function FindCoachPage() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8">
         {/* Logo和标题 */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-3xl">T</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">寻找合适的教练</h1>
@@ -149,7 +149,7 @@ export default function FindCoachPage() {
                   step="50"
                   value={formData.budget.min}
                   onChange={(e) => handleBudgetChange('min', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 />
               </div>
               <div>
@@ -163,7 +163,7 @@ export default function FindCoachPage() {
                   step="50"
                   value={formData.budget.max}
                   onChange={(e) => handleBudgetChange('max', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 />
               </div>
             </div>
@@ -173,14 +173,14 @@ export default function FindCoachPage() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">上课时间偏好</h2>
             <div className="grid md:grid-cols-3 gap-3">
-              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
                 <input
                   type="radio"
                   name="preferredTime"
                   value="weekend"
                   checked={formData.preferredTime === 'weekend'}
                   onChange={(e) => setFormData(prev => ({ ...prev, preferredTime: e.target.value }))}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
                 />
                 <div className="ml-3">
                   <div className="font-medium text-gray-900">周末</div>
@@ -188,14 +188,14 @@ export default function FindCoachPage() {
                 </div>
               </label>
               
-              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
                 <input
                   type="radio"
                   name="preferredTime"
                   value="weekday"
                   checked={formData.preferredTime === 'weekday'}
                   onChange={(e) => setFormData(prev => ({ ...prev, preferredTime: e.target.value }))}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
                 />
                 <div className="ml-3">
                   <div className="font-medium text-gray-900">工作日白天</div>
@@ -203,14 +203,14 @@ export default function FindCoachPage() {
                 </div>
               </label>
               
-              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
                 <input
                   type="radio"
                   name="preferredTime"
                   value="evening"
                   checked={formData.preferredTime === 'evening'}
                   onChange={(e) => setFormData(prev => ({ ...prev, preferredTime: e.target.value }))}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
                 />
                 <div className="ml-3">
                   <div className="font-medium text-gray-900">工作日晚上</div>
@@ -233,7 +233,7 @@ export default function FindCoachPage() {
                   placeholder="请输入城市"
                   value={formData.city}
                   onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 />
               </div>
               <div>
@@ -245,7 +245,7 @@ export default function FindCoachPage() {
                   placeholder="请输入区域"
                   value={formData.district}
                   onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 />
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function FindCoachPage() {
               {learningGoals.map(goal => (
                 <label
                   key={goal.id}
-                  className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${formData.learningGoal === goal.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-300'}`}
+                  className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${formData.learningGoal === goal.id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 hover:border-emerald-300'}`}
                 >
                   <input
                     type="radio"
@@ -266,7 +266,7 @@ export default function FindCoachPage() {
                     value={goal.id}
                     checked={formData.learningGoal === goal.id}
                     onChange={(e) => setFormData(prev => ({ ...prev, learningGoal: e.target.value }))}
-                    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    className="mt-1 w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
                   />
                   <div className="ml-3">
                     <div className="font-medium text-gray-900">{goal.name}</div>
@@ -284,7 +284,7 @@ export default function FindCoachPage() {
               {venuePreferences.map(venue => (
                 <label
                   key={venue.id}
-                  className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${formData.venuePreference === venue.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-300'}`}
+                  className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${formData.venuePreference === venue.id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 hover:border-emerald-300'}`}
                 >
                   <input
                     type="radio"
@@ -292,7 +292,7 @@ export default function FindCoachPage() {
                     value={venue.id}
                     checked={formData.venuePreference === venue.id}
                     onChange={(e) => setFormData(prev => ({ ...prev, venuePreference: e.target.value }))}
-                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
                   />
                   <span className="ml-3 font-medium text-gray-900">{venue.name}</span>
                 </label>
@@ -305,7 +305,7 @@ export default function FindCoachPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="w-full py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
             >
               {loading ? '寻找教练中...' : '寻找合适的教练'}
             </button>
@@ -316,7 +316,7 @@ export default function FindCoachPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             已有心仪的教练？
-            <Link href="/coaches" className="text-blue-600 hover:text-blue-700 font-semibold ml-1">
+            <Link href="/coaches" className="text-emerald-600 hover:text-emerald-700 font-semibold ml-1">
               直接查看教练列表
             </Link>
           </p>
