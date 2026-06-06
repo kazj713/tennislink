@@ -1,16 +1,19 @@
 /**
  * 数据导出 API
- * 支持导出订单、用户、课程等数据为 Excel/CSV 格式
+ * 从数据库查询真实数据，支持导出为 CSV/JSON 格式
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWTToken } from '@/lib/auth';
+import { db } from '@/storage/database/instance';
+import { users, coaches, venues, bookings, paymentOrders, courses } from '@/storage/database/shared/schema';
+import { sql } from 'drizzle-orm';
 
 // 导出格式类型
- type ExportFormat = 'csv' | 'json';
+type ExportFormat = 'csv' | 'json';
 
 // 导出数据类型
- type ExportType = 'bookings' | 'users' | 'coaches' | 'venues' | 'payments';
+type ExportType = 'bookings' | 'users' | 'coaches' | 'venues' | 'payments';
 
 /**
  * 验证管理员权限
@@ -33,7 +36,6 @@ function convertToCSV(data: any[], headers: string[]): string {
     return headers
       .map((header) => {
         const value = item[header];
-        // 处理包含逗号或换行符的值
         if (typeof value === 'string' && (value.includes(',') || value.includes('\n') || value.includes('"'))) {
           return `"${value.replace(/"/g, '""')}"`;
         }
@@ -46,161 +48,114 @@ function convertToCSV(data: any[], headers: string[]): string {
 }
 
 /**
- * 获取预订数据
+ * 从数据库获取预订数据
  */
 async function getBookingsData() {
-  // 这里应该从数据库获取数据
-  // 示例数据
-  return [
-    {
-      id: 'booking-1',
-      userName: '张三',
-      coachName: '李教练',
-      venueName: '朝阳网球中心',
-      date: '2024-01-15',
-      time: '14:00-16:00',
-      status: 'completed',
-      amount: 400,
-      createdAt: '2024-01-10T10:00:00Z',
-    },
-    {
-      id: 'booking-2',
-      userName: '李四',
-      coachName: '王教练',
-      venueName: '海淀网球俱乐部',
-      date: '2024-01-16',
-      time: '10:00-12:00',
-      status: 'pending',
-      amount: 350,
-      createdAt: '2024-01-11T09:00:00Z',
-    },
-  ];
+  const result = await db.execute(sql`
+    SELECT
+      b.id,
+      u.name as "userName",
+      uc.name as "coachName",
+      b.scheduled_date as date,
+      b.duration,
+      b.status,
+      b.payment_amount as amount,
+      b.created_at as "createdAt"
+    FROM bookings b
+    LEFT JOIN users u ON b.user_id = u.id
+    LEFT JOIN users uc ON b.coach_id = (SELECT user_id FROM coaches WHERE id = b.coach_id LIMIT 1)
+    ORDER BY b.created_at DESC
+  `);
+  return result.rows.map((row: any) => ({
+    ...row,
+    date: row.date ? new Date(row.date).toISOString().split('T')[0] : '',
+  }));
 }
 
 /**
- * 获取用户数据
+ * 从数据库获取用户数据
  */
 async function getUsersData() {
-  return [
-    {
-      id: 'user-1',
-      name: '张三',
-      email: 'zhangsan@example.com',
-      phone: '13800138001',
-      role: 'user',
-      level: '3.0',
-      createdAt: '2024-01-01T00:00:00Z',
-      bookingCount: 5,
-      totalSpent: 2000,
-    },
-    {
-      id: 'user-2',
-      name: '李四',
-      email: 'lisi@example.com',
-      phone: '13800138002',
-      role: 'user',
-      level: '2.5',
-      createdAt: '2024-01-05T00:00:00Z',
-      bookingCount: 3,
-      totalSpent: 1200,
-    },
-  ];
+  const result = await db.execute(sql`
+    SELECT
+      id,
+      name,
+      email,
+      phone,
+      role,
+      skill_level as level,
+      city,
+      is_active as isActive,
+      created_at as createdAt
+    FROM users
+    ORDER BY created_at DESC
+  `);
+  return result.rows;
 }
 
 /**
- * 获取教练数据
+ * 从数据库获取教练数据
  */
 async function getCoachesData() {
-  return [
-    {
-      id: 'coach-1',
-      name: '李教练',
-      email: 'licoach@example.com',
-      phone: '13900139001',
-      hourlyRate: 300,
-      yearsOfExperience: 10,
-      rating: 4.8,
-      reviewCount: 128,
-      bookingCount: 50,
-      totalEarnings: 15000,
-      status: 'active',
-    },
-    {
-      id: 'coach-2',
-      name: '王教练',
-      email: 'wangcoach@example.com',
-      phone: '13900139002',
-      hourlyRate: 250,
-      yearsOfExperience: 5,
-      rating: 4.5,
-      reviewCount: 64,
-      bookingCount: 30,
-      totalEarnings: 7500,
-      status: 'active',
-    },
-  ];
+  const result = await db.execute(sql`
+    SELECT
+      c.id,
+      u.name,
+      u.email,
+      u.phone,
+      c.hourly_rate as hourlyRate,
+      c.experience_years as yearsOfExperience,
+      c.average_rating as rating,
+      c.review_count as reviewCount,
+      c.total_lessons as bookingCount,
+      c.status
+    FROM coaches c
+    JOIN users u ON c.user_id = u.id
+    ORDER BY c.created_at DESC
+  `);
+  return result.rows;
 }
 
 /**
- * 获取场地数据
+ * 从数据库获取场地数据
  */
 async function getVenuesData() {
-  return [
-    {
-      id: 'venue-1',
-      name: '朝阳网球中心',
-      address: '北京市朝阳区朝阳公园南路1号',
-      phone: '010-12345678',
-      courts: 12,
-      pricePerHour: 100,
-      rating: 4.8,
-      reviewCount: 256,
-      bookingCount: 100,
-      totalRevenue: 50000,
-      status: 'active',
-    },
-    {
-      id: 'venue-2',
-      name: '海淀网球俱乐部',
-      address: '北京市海淀区中关村大街1号',
-      phone: '010-87654321',
-      courts: 8,
-      pricePerHour: 120,
-      rating: 4.6,
-      reviewCount: 189,
-      bookingCount: 80,
-      totalRevenue: 40000,
-      status: 'active',
-    },
-  ];
+  const result = await db.execute(sql`
+    SELECT
+      id,
+      name,
+      address,
+      city,
+      district,
+      phone,
+      type,
+      is_active as status,
+      created_at as createdAt
+    FROM venues
+    ORDER BY created_at DESC
+  `);
+  return result.rows;
 }
 
 /**
- * 获取支付数据
+ * 从数据库获取支付数据
  */
 async function getPaymentsData() {
-  return [
-    {
-      id: 'payment-1',
-      orderId: 'order-1',
-      userName: '张三',
-      amount: 400,
-      method: 'wechat',
-      status: 'success',
-      createdAt: '2024-01-10T10:00:00Z',
-      paidAt: '2024-01-10T10:05:00Z',
-    },
-    {
-      id: 'payment-2',
-      orderId: 'order-2',
-      userName: '李四',
-      amount: 350,
-      method: 'alipay',
-      status: 'success',
-      createdAt: '2024-01-11T09:00:00Z',
-      paidAt: '2024-01-11T09:03:00Z',
-    },
-  ];
+  const result = await db.execute(sql`
+    SELECT
+      po.id,
+      po.order_no as orderId,
+      u.name as userName,
+      po.amount,
+      po.payment_method as method,
+      po.status,
+      po.paid_at as paidAt,
+      po.created_at as createdAt
+    FROM payment_orders po
+    LEFT JOIN users u ON po.user_id = u.id
+    ORDER BY po.created_at DESC
+  `);
+  return result.rows;
 }
 
 /**
@@ -222,8 +177,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') as ExportType;
     const format = (searchParams.get('format') || 'csv') as ExportFormat;
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
 
     // 验证参数
     if (!type || !['bookings', 'users', 'coaches', 'venues', 'payments'].includes(type)) {
@@ -233,7 +186,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 获取数据
+    // 从数据库获取数据
     let data: any[] = [];
     let headers: string[] = [];
     let filename = '';
@@ -241,27 +194,27 @@ export async function GET(request: NextRequest) {
     switch (type) {
       case 'bookings':
         data = await getBookingsData();
-        headers = ['id', 'userName', 'coachName', 'venueName', 'date', 'time', 'status', 'amount', 'createdAt'];
+        headers = ['id', 'userName', 'coachName', 'date', 'duration', 'status', 'amount', 'createdAt'];
         filename = `bookings_${new Date().toISOString().split('T')[0]}`;
         break;
       case 'users':
         data = await getUsersData();
-        headers = ['id', 'name', 'email', 'phone', 'role', 'level', 'createdAt', 'bookingCount', 'totalSpent'];
+        headers = ['id', 'name', 'email', 'phone', 'role', 'level', 'city', 'isActive', 'createdAt'];
         filename = `users_${new Date().toISOString().split('T')[0]}`;
         break;
       case 'coaches':
         data = await getCoachesData();
-        headers = ['id', 'name', 'email', 'phone', 'hourlyRate', 'yearsOfExperience', 'rating', 'reviewCount', 'bookingCount', 'totalEarnings', 'status'];
+        headers = ['id', 'name', 'email', 'phone', 'hourlyRate', 'yearsOfExperience', 'rating', 'reviewCount', 'bookingCount', 'status'];
         filename = `coaches_${new Date().toISOString().split('T')[0]}`;
         break;
       case 'venues':
         data = await getVenuesData();
-        headers = ['id', 'name', 'address', 'phone', 'courts', 'pricePerHour', 'rating', 'reviewCount', 'bookingCount', 'totalRevenue', 'status'];
+        headers = ['id', 'name', 'address', 'city', 'district', 'phone', 'type', 'status', 'createdAt'];
         filename = `venues_${new Date().toISOString().split('T')[0]}`;
         break;
       case 'payments':
         data = await getPaymentsData();
-        headers = ['id', 'orderId', 'userName', 'amount', 'method', 'status', 'createdAt', 'paidAt'];
+        headers = ['id', 'orderId', 'userName', 'amount', 'method', 'status', 'paidAt', 'createdAt'];
         filename = `payments_${new Date().toISOString().split('T')[0]}`;
         break;
     }
