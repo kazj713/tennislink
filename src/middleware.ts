@@ -51,19 +51,6 @@ function detectSuspiciousActivity(req: Request): boolean {
   );
 }
 
-/**
- * IP白名单检查
- */
-function isIPAllowed(ip: string): boolean {
-  // 开发环境允许所有IP，生产环境应该配置白名单
-  if (process.env.NODE_ENV === 'development') {
-    return true;
-  }
-
-  const allowedIPs = (process.env.ALLOWED_IPS || '').split(',').map(s => s.trim());
-  return allowedIPs.length === 0 || allowedIPs.includes(ip);
-}
-
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
