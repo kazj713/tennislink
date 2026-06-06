@@ -489,7 +489,7 @@ export default function VenuesPage() {
   // 加载状态
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#2d5a4a] via-[#5a8b70] to-[#a08060] pt-16 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-primary-dark via-primary to-secondary-light pt-16 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-white/90 text-lg">正在加载场地信息...</p>
@@ -499,7 +499,7 @@ export default function VenuesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2d5a4a] via-[#5a8b70] to-[#a08060] pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-primary-dark via-primary to-secondary-light pt-16 pb-24">
       {/* 顶部标题区域 */}
       <div className="bg-white/10 backdrop-blur-md border-b border-white/20 text-white pt-8 pb-6">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -514,7 +514,7 @@ export default function VenuesPage() {
               onClick={requestGeolocation}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm border transition-all ${
                 locationStatus === 'success'
-                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100'
+                  ? 'bg-primary-light/20 border-primary-light/40 text-primary-light'
                   : locationStatus === 'loading'
                   ? 'bg-blue-500/20 border-blue-400/40 text-blue-100'
                   : locationStatus === 'error'
@@ -829,7 +829,7 @@ export default function VenuesPage() {
                   {selectedSlots.map((slot, index) => (
                     <div
                       key={index}
-                      className="flex-shrink-0 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg px-3 py-2 relative group"
+                      className="flex-shrink-0 bg-gradient-to-r from-[#F5F5EF] to-[#F0EDE0] border border-secondary-light/30 rounded-lg px-3 py-2 relative group"
                     >
                       <button
                         onClick={() => removeSelectedSlot(index)}
@@ -844,7 +844,7 @@ export default function VenuesPage() {
                       <div className="text-xs text-gray-600">
                         {slot.timeRange}
                       </div>
-                      <div className="text-sm font-bold text-emerald-600 mt-1">
+                      <div className="text-sm font-bold text-primary mt-1">
                         ¥{slot.price}
                       </div>
                     </div>
@@ -867,7 +867,7 @@ export default function VenuesPage() {
                   className={`px-8 py-3 rounded-xl font-bold text-lg whitespace-nowrap transition-all transform hover:scale-105 active:scale-95 ${
                     isSubmitting
                       ? 'bg-gray-400 text-white cursor-wait'
-                      : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg hover:shadow-xl hover:from-emerald-500 hover:to-teal-500'
+                      : 'bg-gradient-to-r from-primary to-accent-teal text-white shadow-lg hover:shadow-xl hover:from-primary-light hover:to-accent-teal'
                   }`}
                 >
                   {isSubmitting ? (

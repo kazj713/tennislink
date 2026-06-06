@@ -39,7 +39,8 @@ import type {
  * 负责分账相关的数据库操作，包括分账规则管理、接收方管理、分账记录处理和结算管理
  */
 export class ProfitSharingManager {
-  private logger = logger.withContext('ProfitSharingManager');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private logger = logger.withContext({ context: 'ProfitSharingManager' } as any);
   /**
    * 创建分账规则
    * @param data 分账规则数据
@@ -247,10 +248,11 @@ export class ProfitSharingManager {
       return record;
     } catch (error: any) {
       this.logger.error('创建分账记录失败', {
-        error: error.message,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        errorMessage: error.message,
         recipientId: data.recipientId,
         amount: data.amount
-      }, error);
+      } as any, error);
       throw error;
     }
   }
@@ -593,9 +595,10 @@ export class ProfitSharingManager {
       return updatedSettlement;
     } catch (error: any) {
       this.logger.error('处理手动转账失败', {
-        error: error.message,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        errorMessage: error.message,
         settlementId
-      }, error);
+      } as any, error);
       throw error;
     }
   }

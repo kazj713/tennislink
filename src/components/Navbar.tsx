@@ -115,7 +115,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1a5442]/90 backdrop-blur-md border-b border-white/10 shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-primary-dark/90 backdrop-blur-md border-b border-white/10 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -297,7 +297,7 @@ export default function Navbar() {
 
       {/* 移动端汉堡菜单面板 */}
       {showMobileMenu && (
-        <div className="md:hidden border-t border-white/10 bg-[#1a5442]/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-white/10 bg-primary-dark/95 backdrop-blur-md">
           <div className="px-4 py-3 space-y-1">
             {navItems.map((item) => (
               <Link

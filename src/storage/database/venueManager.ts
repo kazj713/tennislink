@@ -189,7 +189,6 @@ export class VenueManager {
   }
 
   async updateVenueSlot(id: string, data: UpdateVenueSlot): Promise<VenueSlot | null> {
-    const db = await getDb();
     const validated = updateVenueSlotSchema.parse(data);
     const [slot] = await db.update(venueSlots).set(validated).where(eq(venueSlots.id, id)).returning();
     return slot || null;

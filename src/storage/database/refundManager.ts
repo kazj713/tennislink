@@ -43,7 +43,7 @@ export class RefundManager {
 
     const conditions: any[] = [eq(refundRequests.userId, userId)];
     if (status) {
-      conditions.push(eq(refundRequests.status, status));
+      conditions.push(eq(refundRequests.status, status as any));
     }
 
     return db
@@ -64,7 +64,7 @@ export class RefundManager {
 
     const conditions: any[] = [];
     if (status) {
-      conditions.push(eq(refundRequests.status, status));
+      conditions.push(eq(refundRequests.status, status as any));
     }
 
     return db

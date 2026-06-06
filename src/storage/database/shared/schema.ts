@@ -2048,7 +2048,7 @@ export const wallets = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }),
   },
   (table) => ({
-    userIdx: index("wallets_user_idx").on(table.userId).unique(),
+    userIdx: index("wallets_user_idx").on(table.userId),
   })
 );
 

@@ -27,7 +27,7 @@ export default function MatchupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/50 to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#F5F5EF]/50 to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">创建对战</h1>
         
@@ -43,7 +43,7 @@ export default function MatchupPage() {
               对战类型
             </label>
             <select 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-light"
             >
               <option value="singles">单打</option>
               <option value="doubles">双打</option>
@@ -55,7 +55,7 @@ export default function MatchupPage() {
               场地类型
             </label>
             <select 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-light"
             >
               <option value="hard">硬地</option>
               <option value="clay">红土</option>
@@ -69,7 +69,7 @@ export default function MatchupPage() {
             </label>
             <input 
               type="datetime-local" 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-light"
             />
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function MatchupPage() {
         <button
           onClick={handleCreateMatchup}
           disabled={loading}
-          className="mt-6 w-full bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-6 w-full bg-primary hover:bg-primary-dark focus:outline-none focus:ring-primary-light focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? '创建中...' : '创建对战'}
         </button>

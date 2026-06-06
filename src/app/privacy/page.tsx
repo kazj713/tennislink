@@ -2,13 +2,13 @@ import Link from 'next/link';
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EF] to-[#EEF2EA] p-4 py-8 pt-20">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-auto p-8">
         {/* 导航 */}
         <div className="mb-8">
-          <Link 
-            href="/" 
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+          <Link
+            href="/"
+            className="inline-flex items-center text-primary hover:text-primary-dark transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
               <path d="m15 18-6-6 6-6"/>
@@ -129,8 +129,7 @@ export default function PrivacyPage() {
             <p>
               如果您对本隐私政策有任何疑问或建议，请通过以下方式联系我们：
             </p>
-            <p className="mt-2">邮箱：privacy@tennislink.com</p>
-            <p>电话：400-123-4567</p>
+            <p className="mt-2">邮箱：welov_dign3qgt4q@aka.yeah.net</p>
           </section>
         </div>
 
@@ -138,7 +137,7 @@ export default function PrivacyPage() {
         <div className="mt-12 text-center">
           <Link 
             href="/register" 
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            className="inline-flex items-center text-primary hover:text-primary-dark font-medium transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
               <path d="m15 18-6-6 6-6"/>

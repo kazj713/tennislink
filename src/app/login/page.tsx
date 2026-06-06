@@ -192,11 +192,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EF] to-[#EEF2EA] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-3xl">T</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">欢迎回来</h1>
@@ -209,7 +209,7 @@ export default function LoginPage() {
             onClick={() => setUserType('student')}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
               userType === 'student'
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -219,7 +219,7 @@ export default function LoginPage() {
             onClick={() => setUserType('coach')}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
               userType === 'coach'
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -229,7 +229,7 @@ export default function LoginPage() {
             onClick={() => setUserType('admin')}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
               userType === 'admin'
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -243,26 +243,26 @@ export default function LoginPage() {
             onClick={() => handleBackToPasswordLogin()}
             className={`flex-1 py-3 text-center font-semibold transition-colors relative ${
               !showQrLogin
-                ? 'text-emerald-600'
+                ? 'text-primary'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             账号密码登录
             {!showQrLogin && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></span>
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></span>
             )}
           </button>
           <button
             onClick={() => handleWechatQRLogin()}
             className={`flex-1 py-3 text-center font-semibold transition-colors relative ${
               showQrLogin
-                ? 'text-emerald-600'
+                ? 'text-primary'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             微信扫码登录
             {showQrLogin && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></span>
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></span>
             )}
           </button>
         </div>
@@ -288,7 +288,7 @@ export default function LoginPage() {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
               />
             </div>
 
@@ -303,7 +303,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
               />
             </div>
 
@@ -314,13 +314,13 @@ export default function LoginPage() {
                 id="agreeTerms"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary-light"
               />
               <label htmlFor="agreeTerms" className="text-sm text-gray-600">
                 我已阅读并同意{' '}
-                <a href="/terms" className="text-emerald-600 hover:underline">《用户服务协议》</a>
+                <a href="/terms" className="text-primary hover:underline">《用户服务协议》</a>
                 {' '}和{' '}
-                <a href="/privacy" className="text-emerald-600 hover:underline">《隐私政策》</a>
+                <a href="/privacy" className="text-primary hover:underline">《隐私政策》</a>
               </label>
             </div>
             {!agreeTerms && (
@@ -331,14 +331,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || !agreeTerms}
-              className="w-full py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? '登录中...' : '登录'}
             </button>
 
             {/* 忘记密码链接 */}
             <div className="text-center">
-              <Link href="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700">
+              <Link href="/forgot-password" className="text-sm text-primary hover:text-primary-dark">
                 忘记密码？
               </Link>
             </div>
@@ -352,7 +352,7 @@ export default function LoginPage() {
             <div className="relative w-[280px] h-[280px] border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50">
               {qrStatus === 'loading' && (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                   <p className="text-gray-500 text-sm">正在生成二维码...</p>
                 </div>
               )}
@@ -362,7 +362,7 @@ export default function LoginPage() {
                   <img src={qrCodeData} alt="微信扫码登录" className="w-[280px] h-[280px]" />
                   {qrStatus === 'scanned' && (
                     <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                      <p className="text-emerald-600 font-semibold">已扫描，请在手机上确认</p>
+                      <p className="text-primary font-semibold">已扫描，请在手机上确认</p>
                     </div>
                   )}
                 </>
@@ -374,7 +374,7 @@ export default function LoginPage() {
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22 4 12 14.01 9 11.01"/>
                   </svg>
-                  <p className="text-emerald-600 font-semibold">登录成功，正在跳转...</p>
+                  <p className="text-primary font-semibold">登录成功，正在跳转...</p>
                 </div>
               )}
 
@@ -383,7 +383,7 @@ export default function LoginPage() {
                   <p className="text-gray-500 text-sm">二维码已过期</p>
                   <button
                     onClick={() => handleWechatQRLogin()}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm"
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm"
                   >
                     刷新二维码
                   </button>
@@ -395,7 +395,7 @@ export default function LoginPage() {
                   <p className="text-red-500 text-sm">获取失败</p>
                   <button
                     onClick={() => handleWechatQRLogin()}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm"
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm"
                   >
                     重试
                   </button>
@@ -413,7 +413,7 @@ export default function LoginPage() {
             {/* 返回账号密码登录 */}
             <button
               onClick={() => handleBackToPasswordLogin()}
-              className="mt-6 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+              className="mt-6 text-sm text-primary hover:text-primary-dark font-medium"
             >
               返回账号密码登录
             </button>
@@ -423,7 +423,7 @@ export default function LoginPage() {
         {/* 注册链接 */}
         <p className="mt-6 text-center text-gray-600">
           还没有账号？
-          <Link href="/register" className="text-emerald-600 hover:text-emerald-700 font-semibold ml-1">
+          <Link href="/register" className="text-primary hover:text-primary-dark font-semibold ml-1">
             立即注册
           </Link>
         </p>
@@ -432,7 +432,7 @@ export default function LoginPage() {
         <div className="mt-4 pt-4 border-t border-gray-100">
           <Link
             href="/admin"
-            className="flex items-center justify-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors text-sm"
+            className="flex items-center justify-center gap-2 text-gray-500 hover:text-primary transition-colors text-sm"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>

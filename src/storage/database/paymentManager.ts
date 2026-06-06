@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { getDb } from "coze-coding-dev-sdk";
 import {
   paymentOrders,
+  users,
   insertPaymentOrderSchema,
   updatePaymentOrderSchema,
   type PaymentOrder,
@@ -146,7 +147,7 @@ export async function updatePaymentStatus(orderId: string, paymentInfo: PaymentI
     // 3. 更新订单状态
     const updatedOrder = await updateOrderStatus(orderId, {
       status: paymentInfo.status === 'SUCCESS' ? 'paid' : 'failed',
-      paidAmount: paymentInfo.paidAmount,
+      paidAmount: paymentInfo.paidAmount?.toString(),
       transactionId: paymentInfo.transactionId,
       paymentMethod: paymentInfo.paymentMethod,
       buyerId: paymentInfo.buyerId,
@@ -276,7 +277,6 @@ async function handleMembershipPayment(order: PaymentOrder, paymentInfo: Payment
           status: 'active',
           paymentStatus: 'paid',
           transactionId: paymentInfo.transactionId,
-          updatedAt: new Date(),
         })
         .where(eq(userVipSubscriptions.id, subscriptionId));
       
@@ -441,9 +441,10 @@ async function createNotification(notificationData: {
       .insert(notifications)
       .values({
         ...notificationData,
+        type: notificationData.type as any,
         status: 'unread',
         createdAt: new Date(),
-      });
+      } as any);
     
     console.log(`通知已创建：${notificationData.title}`);
   } catch (error) {
@@ -482,10 +483,9 @@ export async function refundOrder(orderId: string, refundAmount: number, reason:
       .update(paymentOrders)
       .set({
         status: 'refunded',
-        refundAmount,
+        refundAmount: refundAmount.toString(),
         refundReason: reason,
         refundedAt: new Date(),
-        updatedAt: new Date(),
       })
       .where(eq(paymentOrders.id, orderId))
       .returning();

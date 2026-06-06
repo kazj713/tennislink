@@ -65,11 +65,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EF] to-[#EEF2EA] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-3xl">T</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">忘记密码</h1>
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? '发送中...' : '发送验证码'}
           </button>
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
 
         {/* 返回登录链接 */}
         <p className="mt-6 text-center text-gray-600">
-          <Link href="/login" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+          <Link href="/login" className="text-primary hover:text-primary-dark font-semibold">
             返回登录
           </Link>
         </p>

@@ -3,7 +3,7 @@
  * 用于图片、文件等资源的上传和管理
  */
 
-import { COS } from 'cos-nodejs-sdk-v5';
+import COS from 'cos-nodejs-sdk-v5';
 
 export interface UploadResult {
   success: boolean;
@@ -31,11 +31,12 @@ export function getCOSClient() {
     throw new Error('COS配置缺失：请设置 COS_SECRET_ID 和 COS_SECRET_KEY');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new COS({
     SecretId: secretId,
     SecretKey: secretKey,
     Region: region,
-  });
+  } as any);
 }
 
 /**
@@ -96,7 +97,7 @@ export async function uploadFile(
       Body: fileBuffer,
       ContentType: options.contentType || 'application/octet-stream',
       ACL: options.isPublic ? 'public-read' : 'private',
-    };
+    } as any;
 
     return new Promise((resolve, reject) => {
       cos.uploadFile(uploadParams, (err, data) => {

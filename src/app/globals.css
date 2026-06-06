@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  /* 主色调 */
-  --primary: #C41E3A; /* 中国红 */
-  --primary-dark: #A81A32;
-  --secondary: #006DB7; /* 网球蓝 */
-  --secondary-dark: #005A9E;
+  /* 主色调 - 墨绿色系 */
+  --primary: #2D5016; /* 墨绿主色 */
+  --primary-dark: #1E3A0F; /* 深墨绿 */
+  --primary-light: #4A7023; /* 浅墨绿 */
   
-  /* 辅助色 */
-  --accent-blue: #006DB7; /* 网球蓝 */
-  --accent-gold: #FFD700; /* 金色 */
-  --accent-orange: #FF9800; /* 橙色 */
+  /* 辅助色 - 咖色系 */
+  --secondary: #8B6914; /* 咖色/金棕 */
+  --secondary-dark: #6B5010; /* 深咖色 */
+  --secondary-light: #A68B5B; /* 浅咖色 */
+  
+  /* 功能强调色 */
+  --accent-gold: #D4A574; /* 米金/浅咖 */
+  --accent-olive: #6B8E23; /* 橄榄绿 */
+  --accent-teal: #008080; /* 蓝绿（点缀）*/
+  --accent-orange: #CC8833; /* 琥珀橙 */
   
   /* 中性色 */
   --dark-gray: #333333;
@@ -18,15 +23,15 @@
   --light-gray: #E0E0E0;
   --extra-light-gray: #F5F5F5;
   
-  /* 背景色 */
-  --background: #ffffff;
-  --background-gradient: linear-gradient(135deg, #F5F5F5 0%, #E8F5E8 100%);
+  /* 背景色 - 温暖米白 */
+  --background: #FAFAF5;
+  --background-gradient: linear-gradient(135deg, #F5F5EF 0%, #EEF2EA 100%);
   
   /* 文本色 */
-  --foreground: #333333;
-  --foreground-secondary: #666666;
-  --foreground-light: #999999;
-  --foreground-inverse: #ffffff;
+  --foreground: #2C2C2C;
+  --foreground-secondary: #555555;
+  --foreground-light: #888888;
+  --foreground-inverse: #FFFFFF;
   
   /* 状态色 */
   --success: #4CAF50;
@@ -38,10 +43,13 @@
 @theme inline {
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
   --color-secondary: var(--secondary);
   --color-secondary-dark: var(--secondary-dark);
-  --color-accent-blue: var(--accent-blue);
+  --color-secondary-light: var(--secondary-light);
   --color-accent-gold: var(--accent-gold);
+  --color-accent-olive: var(--accent-olive);
+  --color-accent-teal: var(--accent-teal);
   --color-accent-orange: var(--accent-orange);
   --color-dark-gray: var(--dark-gray);
   --color-medium-gray: var(--medium-gray);

@@ -67,9 +67,9 @@ function isIPAllowed(ip: string): boolean {
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  // 获取客户端IP
-  const ip = request.ip ||
-    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+  // 获取客户端IP（NextRequest 类型未暴露 ip 属性，通过 headers 获取）
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
     'unknown';
 
   // 检测可疑活动

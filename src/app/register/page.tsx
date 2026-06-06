@@ -194,11 +194,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EF] to-[#EEF2EA] flex items-center justify-center p-4 py-8">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* Logo */}
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-3xl">T</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">创建账号</h1>
@@ -211,7 +211,7 @@ export default function RegisterPage() {
             onClick={() => setUserType('student')}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
               userType === 'student'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -221,7 +221,7 @@ export default function RegisterPage() {
             onClick={() => setUserType('coach')}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
               userType === 'coach'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -249,7 +249,7 @@ export default function RegisterPage() {
               value={formData.account}
               onChange={(e) => setFormData({...formData, account: e.target.value})}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
             />
             {/* 自动识别类型提示 */}
             {formData.account && (
@@ -273,13 +273,13 @@ export default function RegisterPage() {
                 onChange={(e) => setFormData({...formData, code: e.target.value})}
                 required
                 maxLength={6}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
               />
               <button
                 type="button"
                 onClick={handleSendCode}
                 disabled={sendingCode || countdown > 0 || !formData.account}
-                className="px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className="px-4 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {sendingCode ? '发送中...' : countdown > 0 ? `${countdown}秒后重发` : '发送验证码'}
               </button>
@@ -299,7 +299,7 @@ export default function RegisterPage() {
               required
               minLength={2}
               maxLength={20}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -315,7 +315,7 @@ export default function RegisterPage() {
               onChange={(e) => setFormData({...formData, password: e.target.value})}
               required
               minLength={6}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -330,7 +330,7 @@ export default function RegisterPage() {
               value={formData.confirmPassword}
               onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -342,17 +342,17 @@ export default function RegisterPage() {
                 type="checkbox"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                className="w-4 h-4 text-primary rounded focus:ring-primary-light border-gray-300 focus:ring-2 focus:ring-offset-2"
             />
           </div>
           <div className="ml-3 text-sm">
             <label htmlFor="agree-terms" className="text-gray-700">
               我已阅读并同意
-              <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href="/terms" className="text-primary hover:text-primary-dark font-medium">
                 《用户协议》
               </Link>
               和
-              <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href="/privacy" className="text-primary hover:text-primary-dark font-medium">
                 《隐私政策》
               </Link>
             </label>
@@ -366,7 +366,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading || !agreeTerms}
-          className="w-full py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? '注册中...' : '注册'}
         </button>
@@ -375,7 +375,7 @@ export default function RegisterPage() {
       {/* 登录链接 */}
       <p className="mt-8 text-center text-gray-600">
         已有账号？
-        <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold ml-1">
+        <Link href="/login" className="text-primary hover:text-primary-dark font-semibold ml-1">
           立即登录
         </Link>
       </p>

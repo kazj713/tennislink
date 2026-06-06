@@ -55,12 +55,12 @@ export default function CoachesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/50 to-gray-50 pt-16">
+    <div className="min-h-screen bg-gradient-to-b from-[#F5F5EF]/50 to-gray-50 pt-16">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-12">
+      <div className="bg-gradient-to-r from-primary to-primary-dark text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">找到你的专属教练</h1>
-          <p className="text-xl text-emerald-100">
+          <p className="text-xl text-primary-light">
             AI 智能匹配，为你推荐最适合的网球教练
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function CoachesPage() {
             <select
               value={filters.location}
               onChange={(e) => setFilters({...filters, location: e.target.value})}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light outline-none"
             >
               <option value="">全部城市</option>
               <option value="beijing">北京</option>
@@ -85,7 +85,7 @@ export default function CoachesPage() {
             <select
               value={filters.level}
               onChange={(e) => setFilters({...filters, level: e.target.value})}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light outline-none"
             >
               <option value="">全部水平</option>
               <option value="beginner">新手</option>
@@ -97,7 +97,7 @@ export default function CoachesPage() {
             <select
               value={filters.priceRange}
               onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-light outline-none"
             >
               <option value="">全部价格</option>
               <option value="0-200">¥0 - ¥200</option>
@@ -106,7 +106,7 @@ export default function CoachesPage() {
               <option value="400+">¥400+</option>
             </select>
 
-            <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold">
+            <button className="px-6 py-2 bg-primary hover:bg-primary-dark text-white font-semibold transition-colors">
               搜索
             </button>
           </div>
@@ -117,19 +117,19 @@ export default function CoachesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mb-4"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
             <p className="text-gray-600">加载教练列表...</p>
           </div>
         ) : coaches.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">暂无教练信息</h3>
             <p className="text-gray-600 mb-6">目前还没有可用的教练，请稍后再来查看</p>
-            <Link href="/find-coach" className="inline-block px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
+            <Link href="/find-coach" className="inline-block px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors">
               填写需求找教练
             </Link>
           </div>
@@ -142,7 +142,7 @@ export default function CoachesPage() {
                 className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1"
               >
                 {/* 头像 */}
-                <div className="aspect-[4/3] bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                <div className="aspect-[4/3] bg-gradient-to-br from-primary-light to-primary flex items-center justify-center">
                   {coach.avatar ? (
                     <img src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
                   ) : (
@@ -170,7 +170,7 @@ export default function CoachesPage() {
                       {coach.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
-                          className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
+                          className="px-3 py-1 bg-primary/5 text-primary-dark text-xs font-medium rounded-full"
                         >
                           {tag}
                         </span>
@@ -184,7 +184,7 @@ export default function CoachesPage() {
                       {coach.years && <span>{coach.years}年经验</span>}
                       {coach.students && <span>{coach.students}+学员</span>}
                     </div>
-                    <span className="text-2xl font-bold text-emerald-600">
+                    <span className="text-2xl font-bold text-primary">
                       ¥{coach.price}
                       <span className="text-sm font-normal text-gray-500">/课时</span>
                     </span>
