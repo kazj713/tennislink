@@ -1,5 +1,5 @@
 import { eq, and, SQL, desc, like, or, sql } from "drizzle-orm";
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "./instance";
 import {
   courses,
   insertCourseSchema,

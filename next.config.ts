@@ -108,7 +108,7 @@ const nextConfig: NextConfig = {
           },
         ],
         permanent: true,
-        destination: 'https://' + env.NEXT_PUBLIC_DOMAIN + '/:path*',
+        destination: (env.NEXT_PUBLIC_DOMAIN?.startsWith('http') ? '' : 'https://') + (env.NEXT_PUBLIC_DOMAIN || 'ydtenhub.online') + '/:path*',
       });
     }
     

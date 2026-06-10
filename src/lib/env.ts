@@ -49,15 +49,11 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   
-  // 短信服务
-  SMS_API_KEY: z.string().optional(),
-  SMS_SENDER_ID: z.string().optional(),
-  
-  // 阿里云
-  ALIYUN_ACCESS_KEY_ID: z.string().optional(),
-  ALIYUN_ACCESS_KEY_SECRET: z.string().optional(),
-  ALIYUN_SMS_TEMPLATE_CODE: z.string().optional(),
-  ALIYUN_SMS_SIGN_NAME: z.string().optional(),
+  // 短信服务（阿里云）
+  SMS_ACCESS_KEY_ID: z.string().optional(),
+  SMS_ACCESS_KEY_SECRET: z.string().optional(),
+  SMS_TEMPLATE_CODE: z.string().optional(),
+  SMS_SIGN_NAME: z.string().optional(),
   
   // 支付宝
   ALIPAY_APP_ID: z.string().optional(),
@@ -108,3 +104,13 @@ export { env };
 
 // 导出环境变量类型
 export type Env = z.infer<typeof envSchema>;
+
+/**
+ * 获取完整的站点 URL（含协议前缀）
+ * NEXT_PUBLIC_DOMAIN 存储纯域名，此函数自动补全 https://
+ */
+export function getSiteUrl(path = ''): string {
+  const domain = env.NEXT_PUBLIC_DOMAIN || 'localhost:3000';
+  const protocol = domain.startsWith('http') ? '' : 'https://';
+  return `${protocol}${domain}${path}`;
+}

@@ -1,4 +1,4 @@
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "./instance";
 
 /**
  * 数据库表创建脚本

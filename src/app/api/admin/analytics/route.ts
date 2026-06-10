@@ -18,7 +18,7 @@ import {
   paymentOrders,
 } from '@/storage/database/shared/schema';
 import { sql, eq, and, gte, lte, count, sum, desc } from 'drizzle-orm';
-import { getDb } from 'coze-coding-dev-sdk';
+import { getDb } from "@/storage/database/instance";
 
 /**
  * 验证管理员权限

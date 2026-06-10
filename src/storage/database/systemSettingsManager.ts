@@ -1,5 +1,5 @@
 import { eq, and, SQL } from "drizzle-orm";
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "./instance";
 import { systemSettings, insertSystemSettingSchema, updateSystemSettingSchema } from "./shared/schema";
 import type { SystemSetting, InsertSystemSetting, UpdateSystemSetting } from "./shared/schema";
 

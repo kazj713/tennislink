@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { coachManager } from "@/storage/database/coachManager";
 import { userManager } from "@/storage/database/userManager";
 import { verifyToken } from "@/lib/auth";
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "@/storage/database/instance";
 import { coaches, users } from "@/storage/database/shared/schema";
 import { eq } from "drizzle-orm";
 

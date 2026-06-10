@@ -5,7 +5,7 @@ import { venueManager } from "@/storage/database/venueManager";
 import { bookingManager } from "@/storage/database/bookingManager";
 import { eq, and, sql } from "drizzle-orm";
 import { verifyToken } from "@/lib/auth";
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "@/storage/database/instance";
 import { bookings } from "@/storage/database/shared/schema";
 
 /**

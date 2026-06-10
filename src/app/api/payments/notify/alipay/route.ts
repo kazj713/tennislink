@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { AlipayPaymentService } from '@/lib/payment/alipay';
+import { getSiteUrl } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   try {
@@ -146,21 +147,21 @@ export async function GET(request: NextRequest) {
       if (!isValidSign) {
         console.error('[支付宝同步回调] 签名验证失败');
         // 重定向到支付失败页面
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_DOMAIN}/payment/error?message=签名验证失败`);
+        return NextResponse.redirect(`${getSiteUrl('/payment/error?message=签名验证失败')}`);
       }
     }
 
     // 根据支付状态重定向到不同页面
     if (tradeStatus === 'TRADE_SUCCESS' || tradeStatus === 'TRADE_FINISHED') {
       // 支付成功，跳转到成功页面
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_DOMAIN}/payment/success?orderId=${outTradeNo}`);
+      return NextResponse.redirect(`${getSiteUrl(`/payment/success?orderId=${outTradeNo}`)}`);
     } else {
       // 支付未完成，跳转到订单详情页
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_DOMAIN}/orders/${outTradeNo}`);
+      return NextResponse.redirect(`${getSiteUrl(`/orders/${outTradeNo}`)}`);
     }
 
   } catch (error) {
     console.error('[支付宝同步回调] 处理失败:', error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_DOMAIN}/payment/error`);
+    return NextResponse.redirect(`${getSiteUrl('/payment/error')}`);
   }
 }

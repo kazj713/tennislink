@@ -1,4 +1,4 @@
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "./instance";
 import { chatRooms, chatMessages, users } from "./shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import type { InsertChatRoom, InsertChatMessage } from "./shared/schema";

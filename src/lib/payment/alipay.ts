@@ -4,6 +4,7 @@
  */
 
 import { PaymentService, PaymentRequest, PaymentResponse, WithdrawRequest, WithdrawResponse } from './index';
+import { getSiteUrl } from '@/lib/env';
 
 // 支付宝SDK类型定义
 type AlipaySdkType = any;
@@ -144,11 +145,11 @@ export class AlipayPaymentService extends PaymentService {
       }
 
       // 构建支付参数
-      const notifyUrl = process.env.ALIPAY_NOTIFY_URL || 
-        `${process.env.NEXT_PUBLIC_DOMAIN}/api/payments/notify/alipay`;
-      
-      const returnUrl = request.returnUrl || 
-        `${process.env.NEXT_PUBLIC_DOMAIN}/payment/success`;
+      const notifyUrl = process.env.ALIPAY_NOTIFY_URL ||
+        `${getSiteUrl()}/api/payments/notify/alipay`;
+
+      const returnUrl = request.returnUrl ||
+        `${getSiteUrl()}/payment/success`;
 
       // 调用支付宝接口创建订单
       const result = await this.alipaySdk.exec('alipay.trade.page.pay', {

@@ -1,6 +1,6 @@
 // 导入所需的数据库相关模块和类型
 import { eq, and, sql, gte, lt } from "drizzle-orm";
-import { getDb } from "coze-coding-dev-sdk";
+import { getDb } from "./instance";
 import {
   userModificationLogs,
   insertUserModificationLogSchema,

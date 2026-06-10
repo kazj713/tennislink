@@ -69,16 +69,16 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // 短信发送逻辑
-        if (process.env.ALIYUN_ACCESS_KEY_ID && process.env.ALIYUN_ACCESS_KEY_SECRET) {
+        if (process.env.SMS_ACCESS_KEY_ID && process.env.SMS_ACCESS_KEY_SECRET) {
           const SMSClient = (await import('@alicloud/sms-sdk')).default;
           const client = new SMSClient({
-            accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.ALIYUN_ACCESS_KEY_SECRET!
+            accessKeyId: process.env.SMS_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.SMS_ACCESS_KEY_SECRET!
           });
           await client.sendSMS({
             PhoneNumbers: target,
-            SignName: process.env.ALIYUN_SMS_SIGN_NAME || '网球链接',
-            TemplateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE || 'SMS_123456789',
+            SignName: process.env.SMS_SIGN_NAME || '网球链接',
+            TemplateCode: process.env.SMS_TEMPLATE_CODE || 'SMS_123456789',
             TemplateParam: JSON.stringify({ code })
           });
           sentSuccessfully = true;

@@ -55,8 +55,8 @@ let smsClient: SMSClient | null = null;
  */
 function getSMSClient(): SMSClient {
   if (!smsClient) {
-    const accessKeyId = process.env.ALIYUN_ACCESS_KEY_ID;
-    const secretAccessKey = process.env.ALIYUN_ACCESS_KEY_SECRET;
+    const accessKeyId = process.env.SMS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.SMS_ACCESS_KEY_SECRET;
     
     if (!accessKeyId || !secretAccessKey) {
       throw new Error('阿里云短信配置未设置');
@@ -105,15 +105,15 @@ async function sendEmailCode(email: string, code: string, type: string): Promise
 async function sendPhoneCode(phone: string, code: string): Promise<void> {
   try {
     // 检查阿里云配置
-    if (!process.env.ALIYUN_ACCESS_KEY_ID || !process.env.ALIYUN_ACCESS_KEY_SECRET) {
+    if (!process.env.SMS_ACCESS_KEY_ID || !process.env.SMS_ACCESS_KEY_SECRET) {
       console.warn('[短信发送] 阿里云配置未设置，使用模拟发送');
       console.log(`[模拟发送短信] 发送到: ${phone}, 验证码: ${code}`);
       return;
     }
 
     // 阿里云短信模板ID和签名（需要在阿里云控制台配置）
-    const templateCode = process.env.ALIYUN_SMS_TEMPLATE_CODE || 'SMS_123456789';
-    const signName = process.env.ALIYUN_SMS_SIGN_NAME || '网球链接';
+    const templateCode = process.env.SMS_TEMPLATE_CODE || 'SMS_123456789';
+    const signName = process.env.SMS_SIGN_NAME || '网球链接';
 
     // 发送短信
     const result = await getSMSClient().sendSMS({
